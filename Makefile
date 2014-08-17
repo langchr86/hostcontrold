@@ -1,7 +1,14 @@
-TARGET := 	ServerControlDaemon.cpp
-ADDFILES :=	wol.c pinglib.cpp filehandling.c
-SOURCE :=	$(TARGET) $(ADDFILES)
-DEST :=		$(TARGET).exe
+DIR_TARGET := bin
+DIR_SRC := src
+DIR_INIT := init.d
+FILE_TARGET := servercontroldaemon
+FILE_SRC := ServerControlDaemon.cpp
+FILE_INIT := servercontroldaemon
+INIT := $(DIR_INIT)/$(FILE_INIT)
+TARGET := 	$(DIR_TARGET)/$(FILE_TARGET)
+MAINFILE := $(DIR_SRC)/ServerControlDaemon.cpp
+ADDFILES :=	$(DIR_SRC)/wol.c $(DIR_SRC)/pinglib.cpp $(DIR_SRC)/filehandling.c
+SOURCE :=	$(MAINFILE) $(ADDFILES)
 
 
 CC :=		g++
@@ -25,29 +32,30 @@ LIBRARIES :=	$(LIB_TMP)
 
 
 default: main
-
-
-run: $(DEST)
-	sudo ./$(DEST)
 	
-install: $(DEST)
-	sudo cp $(DEST) /usr/sbin/servercontroldaemon
-	sudo chmod +x /usr/sbin/servercontroldaemon
+install: stop $(TARGET)
+	sudo cp $(INIT) /etc/init.d/$(FILE_INIT)
+	sudo chmod +x /etc/init.d/$(FILE_INIT)
+	sudo cp $(TARGET) /usr/sbin/$(FILE_TARGET)
+	sudo chmod +x /usr/sbin/$(FILE_TARGET)
 	
-start:
-	sudo /etc/init.d/servercontroldaemon start
+remove: stop
+	sudo rm /etc/init.d/$(FILE_INIT)
+	sudo rm /usr/sbin/$(FILE_TARGET)
 	
-restart: 
-	sudo killall servercontroldaemon
-	sudo /etc/init.d/servercontroldaemon start
+start: /etc/init.d/$(FILE_INIT)
+	sudo service $(FILE_TARGET) start
+	
+restart: /etc/init.d/$(FILE_INIT)
+	sudo service $(FILE_TARGET) restart
 	
 stop:
-	sudo killall servercontroldaemon
+	-sudo killall -q $(FILE_TARGET)
 
 main: clean
-	$(CC) $(FLAGS_C) -o $(DEST) $(SOURCE) $(PATHS) $(LIBRARIES)
+	$(CC) $(FLAGS_C) -o $(TARGET) $(SOURCE) $(PATHS) $(LIBRARIES)
 
 
 clean:
-	rm -f *.o $(DEST) *log
+	rm -f *.o $(TARGET) *log
 .PHONY: clean

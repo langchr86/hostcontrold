@@ -27,7 +27,7 @@ using namespace std;
 
 
 // settings
-static const string mPath("/home/shares/public/");
+static const string mPath("/share/");
 static const string mServerName("lang-mainserver");
 static const string mIP("192.168.0.9");
 static const string mMAC("00:01:2E:31:64:FF");
@@ -75,25 +75,11 @@ static void logWithInt(const char* text, int num) {
 
 
 int main(int argc, char* argv[]) {
-
-	// fork a new child process
-	pid_t pid = fork();
 	
-	if (pid < 0) {
-		printf("[error] fork failed!\n");
-		exit(1);
-	}
-
-	// if its the parent process
-	if (pid > 0) {
-		printf("[info] Daemon started with process-id: %d \n", pid);
-		exit(0);	//terminate the parent process succesfully
-	}
-	
-	
-/************************
+/**********************************
  * Start of Daemon
- ***********************/
+ * Has to be run in background
+ *********************************/
 
 	//unmasking the file mode
 	umask(0);
