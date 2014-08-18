@@ -32,6 +32,10 @@ static const string mServerName("lang-mainserver");
 static const string mServerIP("192.168.0.9");
 static const string mServerMAC("00:01:2E:31:64:FF");
 
+// client settings
+static const int mNumClients = 2;
+static const string mClientList[] = {"192.168.0.16", "192.168.0.25"};
+
 // behaviour settings
 static const int interval = 1;
 
@@ -55,7 +59,7 @@ int serverRunning = -1;		//!< Indicator if server is running. -1 mean not initia
  *
  *	\param	text	The custom log text.
  */
-static void log(const char* text) {
+static void log(string text) {
 	logFile.open((mDirectory + mLogName).c_str(), ios_base::out | ios_base::app);
 	if (logFile.is_open()) {
 		time(&timer);
@@ -75,7 +79,7 @@ static void log(const char* text) {
  *	\param	text	The custom log text.
  *	\param	num		A custom integer that is added at the end of the log text.
  */
-static void logWithInt(const char* text, int num) {
+static void logWithInt(string text, int num) {
 	logFile.open((mDirectory + mLogName).c_str(), ios_base::out | ios_base::app);
 	if (logFile.is_open()) {
 		time(&timer);
@@ -182,34 +186,77 @@ int main(int argc, char* argv[]) {
 	while (1) {	
 		sleep(interval);
 		
+		//****************************
+		// check if server is running
+		//****************************
 		
 		// check if server is running
 		pingRes = ping(mServerIP);
 		
-		if (pingRes > 0) {	// server running
-#if DEBUG
-			log("[debug]\tping > 0");
-#endif			
+		// server running
+		if (pingRes > 0) {
+			#ifdef DEBUG
+				log("[debug]\tserver-ping > 0:\t" + mServerIP);
+			#endif
 			checkAndSignalServerState(1);
-			
-		} else if (pingRes == 0) {	// server not running
-#if DEBUG
-			log("[debug]\tping == 0");
-#endif		
+
+		// server not running
+		} else if (pingRes == 0) {
+			#ifdef DEBUG
+				log("[debug]\tserver-ping == 0:\t" + mServerIP);
+			#endif
 			checkAndSignalServerState(0);
-			
+
+		// log failed ping
 		} else {
-			logWithInt("[error]\tping failed!", pingRes);
+			logWithInt("[error]\tserver-ping failed!:\t" + mServerIP, pingRes);
 		}
-		
-		
+
+
+		//************************
+		// check if client around
+		//************************
+
+		// only check if server not already running
+		if (serverRunning != 1) {
+
+			// iterate over all possible clients
+			for (int c=0; c < mNumClients; ++c) {
+
+				// check if any client is running that needs the server
+				pingRes = ping(mClientList[c]);
+
+				// start server if a new running client has been found
+				if (pingRes > 0) {
+					#ifdef DEBUG
+						log("[debug]\tclient-ping > 0:\t" + mClientList[c]);
+					#endif
+					startServer();
+
+				// do nothing
+				} else if (pingRes == 0) {
+					#ifdef DEBUG
+						log("[debug]\tclient-ping == 0:\t" + mClientList[c]);
+					#endif
+
+				// log failed ping
+				} else {
+					logWithInt("[error]\tclient-ping failed!:\t" + mClientList[c], pingRes);
+				}
+			}
+		}
+
+
+		//****************************
 		// check if start-file around
-		
+		//****************************
+
+		// remove start-file and start server if not already running
 		if (checkAndRemoveFile((mDirectory + mStart).c_str()) && serverRunning != 1) {
 			startServer();
 		}
 	}
 
-	
+
 	return (0);
 }
