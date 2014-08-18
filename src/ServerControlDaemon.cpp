@@ -26,13 +26,14 @@ using namespace std;
 //#define DEBUG
 
 
-// settings
+// server settings
 static const string mPath("/share/");
 static const string mServerName("lang-mainserver");
-static const string mIP("192.168.0.9");
-static const string mMAC("00:01:2E:31:64:FF");
+static const string mServerIP("192.168.0.9");
+static const string mServerMAC("00:01:2E:31:64:FF");
 
-static const int interval = 5;
+// behaviour settings
+static const int interval = 1;
 
 // global constants
 static const string mSep("/");
@@ -43,12 +44,17 @@ static const string mOff("off");
 static const string mStart("start");
 
 // global variables
-time_t timer;
-struct tm* timeinfo;
-ofstream logFile;
-int pingRes = 0;
-int serverRunning = -1;
+time_t timer;				//!< Variable to store the current time.
+struct tm* timeinfo;		//!< Variable that can hold the time as seperated values.
+ofstream logFile;			//!< handle for the log-file.
+int pingRes = 0;			//!< Result of the ping. Positive value means the round-trip time. Negative values means error in ping.
+int serverRunning = -1;		//!< Indicator if server is running. -1 mean not initialized.
 
+/*
+ *	\brief	Writes new line into log-file. Each line starts with the current time stamp.
+ *
+ *	\param	text	The custom log text.
+ */
 static void log(const char* text) {
 	logFile.open((mDirectory + mLogName).c_str(), ios_base::out | ios_base::app);
 	if (logFile.is_open()) {
@@ -63,6 +69,12 @@ static void log(const char* text) {
 	}
 }
 
+/*
+ *	\brief	Writes new line into log-file. Each line starts with the current time stamp.
+ *
+ *	\param	text	The custom log text.
+ *	\param	num		A custom integer that is added at the end of the log text.
+ */
 static void logWithInt(const char* text, int num) {
 	logFile.open((mDirectory + mLogName).c_str(), ios_base::out | ios_base::app);
 	if (logFile.is_open()) {
@@ -77,8 +89,11 @@ static void logWithInt(const char* text, int num) {
 	}
 }
 
+/*
+ *	\brief	Method uses a WOL-package to start the server.
+ */
 static void startServer() {
-	int wolRes = sendWol(mMAC.c_str());
+	int wolRes = sendWol(mServerMAC.c_str());
 	if (wolRes != 0) {
 		logWithInt("[error]\tWOL failed!", wolRes);
 	} else {
@@ -86,6 +101,12 @@ static void startServer() {
 	}
 }
 
+/*
+ *	\brief	Checks if state of server has changed and handles the
+ *			indicator files and logging of the server state.
+ *
+ *	\param	newState	The current state of the server at call time.
+ */
 void checkAndSignalServerState(int newState) {
 	if (newState < 0 || newState > 1) {
 		logWithInt("[error]\tWrong newState!", newState);
@@ -138,7 +159,7 @@ int main(int argc, char* argv[]) {
 	remove((mDirectory + mStart).c_str());
 
 	//set new session
-	pid_t sid = setsid();	
+	pid_t sid = setsid();
 	if(sid < 0) {
 		log("[error]\tsession id failed!");
 		exit(1);
@@ -158,11 +179,12 @@ int main(int argc, char* argv[]) {
 	log("[info]\tDaemon started");
 
 	
-	while (1) {		
+	while (1) {	
 		sleep(interval);
 		
+		
 		// check if server is running
-		pingRes = ping(mIP);
+		pingRes = ping(mServerIP);
 		
 		if (pingRes > 0) {	// server running
 #if DEBUG
@@ -180,7 +202,9 @@ int main(int argc, char* argv[]) {
 			logWithInt("[error]\tping failed!", pingRes);
 		}
 		
+		
 		// check if start-file around
+		
 		if (checkAndRemoveFile((mDirectory + mStart).c_str()) && serverRunning != 1) {
 			startServer();
 		}
