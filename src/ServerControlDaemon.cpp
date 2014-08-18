@@ -51,7 +51,7 @@ static void log(const char* text) {
 		time(&timer);
 		timeinfo = localtime(&timer);
 		logFile << timeinfo->tm_mday << "." << timeinfo->tm_mon+1 << "." << timeinfo->tm_year+1900 << " ";
-		logFile << timeinfo->tm_hour << ":" << timeinfo->tm_min << ":" << timeinfo->tm_sec << "    ";
+		logFile << timeinfo->tm_hour << ":" << timeinfo->tm_min << ":" << timeinfo->tm_sec << "\t\t";
 		logFile << text << endl;
 		logFile.close();
 	} else {
@@ -65,7 +65,7 @@ static void logWithInt(const char* text, int num) {
 		time(&timer);
 		timeinfo = localtime(&timer);
 		logFile << timeinfo->tm_mday << "." << timeinfo->tm_mon+1 << "." << timeinfo->tm_year+1900 << " ";
-		logFile << timeinfo->tm_hour << ":" << timeinfo->tm_min << ":" << timeinfo->tm_sec << "    ";
+		logFile << timeinfo->tm_hour << ":" << timeinfo->tm_min << ":" << timeinfo->tm_sec << "\t\t";
 		logFile << text << " (" << num << ")" << endl;
 		logFile.close();
 	} else {
@@ -98,13 +98,13 @@ int main(int argc, char* argv[]) {
 	//set new session
 	pid_t sid = setsid();	
 	if(sid < 0) {
-		log("[error] session id failed!");
+		log("[error]\tsession id failed!");
 		exit(1);
 	}
 	
 	// Change the current working directory to root.
 	if (chdir("/") < 0) {
-		log("[error] change dir failed!");
+		log("[error]\tchange dir failed!");
 		exit(1);
 	}
 
@@ -113,8 +113,7 @@ int main(int argc, char* argv[]) {
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
 	
-	log("[info] Daemon started");
-	
+	log("[info]\tDaemon started");
 
 	int pingRes = 0;
 	int serverRunning = -1;
@@ -127,7 +126,7 @@ int main(int argc, char* argv[]) {
 		
 		if (pingRes > 0) {	
 #if DEBUG
-			log("ping > 0");
+			log("[debug]\tping > 0");
 #endif			
 			// server running
 			if (serverRunning != 1) {
@@ -141,7 +140,7 @@ int main(int argc, char* argv[]) {
 			}
 		} else if (pingRes == 0) {
 #if DEBUG
-			log("ping == 0");
+			log("[debug]\tping == 0");
 #endif			
 			// server not running
 			if (serverRunning != 0) {
@@ -154,7 +153,7 @@ int main(int argc, char* argv[]) {
 				serverRunning = 0;
 			}
 		} else {
-			logWithInt("ping failed!", pingRes);
+			logWithInt("[error]\tping failed!", pingRes);
 		}
 		
 		// Test if Start-File
