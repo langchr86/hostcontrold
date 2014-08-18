@@ -14,7 +14,7 @@ int removeAllFiles(const char* path) {
 
     dir = opendir(path);
 
-    while ( next_file = readdir(dir) )
+    while ( (next_file = readdir(dir)) )
     {
         // build the full path for each file in the folder
         sprintf(filepath, "%s/%s", path, next_file->d_name);
