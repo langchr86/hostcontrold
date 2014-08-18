@@ -31,7 +31,7 @@ LIB_TMP :=	-loping
 LIBRARIES :=	$(LIB_TMP)
 
 
-default: main
+default: $(TARGET)
 	
 install: stop $(TARGET)
 	sudo cp $(INIT) /etc/init.d/$(FILE_INIT)
@@ -52,7 +52,7 @@ restart: /etc/init.d/$(FILE_INIT)
 stop:
 	-sudo killall -q $(FILE_TARGET)
 
-main: clean
+$(TARGET): clean
 	$(CC) $(FLAGS_C) -o $(TARGET) $(SOURCE) $(PATHS) $(LIBRARIES)
 
 
