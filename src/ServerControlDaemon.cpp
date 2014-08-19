@@ -224,6 +224,12 @@ int main(int argc, char* argv[]) {
 			// iterate over all possible clients
 			for (int c=0; c < mNumClients; ++c) {
 
+				// check if mNumClients too high
+				if (mClientIpList[c].compare("\0") == 0) {
+					logWithInt("[error]\tmNumClients too long!:\t", mNumClients);
+					break;
+				}
+
 				// check if any client is running that needs the server
 				pingRes = ping(mClientIpList[c]);
 
