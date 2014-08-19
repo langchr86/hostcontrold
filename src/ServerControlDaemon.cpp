@@ -37,7 +37,7 @@ static const int mNumClients = 2;
 static const string mClientList[] = {"192.168.0.16", "192.168.0.25"};
 
 // behaviour settings
-static const int interval = 1;
+static const int mInterval = 1;
 
 // global constants
 static const string mSep("/");
@@ -184,7 +184,7 @@ int main(int argc, char* argv[]) {
 
 	
 	while (1) {	
-		sleep(interval);
+		sleep(mInterval);
 		
 		//****************************
 		// check if server is running
