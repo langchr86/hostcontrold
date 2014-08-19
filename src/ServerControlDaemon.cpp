@@ -33,8 +33,9 @@ static const string mServerIP("192.168.0.9");
 static const string mServerMAC("00:01:2E:31:64:FF");
 
 // client settings
-static const int mNumClients = 2;
-static const string mClientList[] = {"192.168.0.16", "192.168.0.25"};
+static const int mNumClients = 4;
+static const string mClientIpList[] = {"192.168.0.16", "192.168.0.25", "192.168.0.19", "192.168.0.11", "\0"};
+static const string mClientNameList[] = {"tv-wohnzimmer", "tv-schlafzimmer", "lang-netbook", "lang-zenon"};
 
 // behaviour settings
 static const int mInterval = 1;
@@ -224,24 +225,27 @@ int main(int argc, char* argv[]) {
 			for (int c=0; c < mNumClients; ++c) {
 
 				// check if any client is running that needs the server
-				pingRes = ping(mClientList[c]);
+				pingRes = ping(mClientIpList[c]);
 
 				// start server if a new running client has been found
 				if (pingRes > 0) {
 					#ifdef DEBUG
-						log("[debug]\tclient-ping > 0:\t" + mClientList[c]);
+						log("[debug]\tclient-ping > 0:\t" + mClientNameList[c]);
 					#endif
 					startServer();
+
+					// not needed to check other clients
+					break;
 
 				// do nothing
 				} else if (pingRes == 0) {
 					#ifdef DEBUG
-						log("[debug]\tclient-ping == 0:\t" + mClientList[c]);
+						log("[debug]\tclient-ping == 0:\t" + mClientNameList[c]);
 					#endif
 
 				// log failed ping
 				} else {
-					logWithInt("[error]\tclient-ping failed!:\t" + mClientList[c], pingRes);
+					logWithInt("[error]\tclient-ping failed!:\t" + mClientNameList[c], pingRes);
 				}
 			}
 		}
