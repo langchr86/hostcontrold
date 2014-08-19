@@ -39,6 +39,7 @@ static const string mClientNameList[] = {"tv-wohnzimmer", "tv-schlafzimmer", "la
 
 // behaviour settings
 static const int mInterval = 1;
+static const int mWolTimeout = 10;
 
 // global constants
 static const string mSep("/");
@@ -49,11 +50,12 @@ static const string mOff("off");
 static const string mStart("start");
 
 // global variables
-time_t timer;				//!< Variable to store the current time.
-struct tm* timeinfo;		//!< Variable that can hold the time as seperated values.
-ofstream logFile;			//!< handle for the log-file.
-int pingRes = 0;			//!< Result of the ping. Positive value means the round-trip time. Negative values means error in ping.
-int serverRunning = -1;		//!< Indicator if server is running. -1 mean not initialized.
+time_t timer;					//!< Variable to store the current time.
+struct tm* timeinfo;			//!< Variable that can hold the time as seperated values.
+ofstream logFile;				//!< handle for the log-file.
+int pingRes = 0;				//!< Result of the ping. Positive value means the round-trip time. Negative values means error in ping.
+int mWolTimeoutToDo = 0;		//!< Indicates how long we have to wait for another WOL. Can send WOL if <= 0.
+int serverRunning = -1;			//!< Indicator if server is running. -1 mean not initialized.
 
 /*
  *	\brief	Writes new line into log-file. Each line starts with the current time stamp.
@@ -98,11 +100,15 @@ static void logWithInt(string text, int num) {
  *	\brief	Method uses a WOL-package to start the server.
  */
 static void startServer() {
-	int wolRes = sendWol(mServerMAC.c_str());
-	if (wolRes != 0) {
-		logWithInt("[error]\tWOL failed!", wolRes);
-	} else {
-		log("[info]\tWOL sent");
+	// only send WOL if server not running and WOL timeout has been expired
+	if (mWolTimeoutToDo <= 0 && serverRunning != 1) {
+		int wolRes = sendWol(mServerMAC.c_str());
+		if (wolRes != 0) {
+			logWithInt("[error]\tWOL failed!", wolRes);
+		} else {
+			mWolTimeoutToDo = mWolTimeout;
+			log("[info]\tWOL sent");
+		}
 	}
 }
 
@@ -115,7 +121,7 @@ static void startServer() {
 void checkAndSignalServerState(int newState) {
 	if (newState < 0 || newState > 1) {
 		logWithInt("[error]\tWrong newState!", newState);
-		
+
 	} else if (newState == 1) {
 		// server changed state to running
 		if (serverRunning != 1) {
@@ -126,6 +132,8 @@ void checkAndSignalServerState(int newState) {
 			remove((mDirectory + mOff).c_str());
 			// set server as running
 			serverRunning = 1;
+			// reset WOL timeout to ensure that next start approach executes immediately
+			mWolTimeoutToDo = 0;
 		}
 	} else {
 		// server changed state to stopped
@@ -264,6 +272,15 @@ int main(int argc, char* argv[]) {
 		// remove start-file and start server if not already running
 		if (checkAndRemoveFile((mDirectory + mStart).c_str()) && serverRunning != 1) {
 			startServer();
+		}
+
+
+		//********************
+		// handle WOL timeout
+		//********************
+
+		if (mWolTimeoutToDo > 0) {
+			mWolTimeoutToDo -= mInterval;
 		}
 	}
 
