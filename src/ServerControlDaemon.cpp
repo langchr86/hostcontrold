@@ -56,12 +56,12 @@ static const string mOff("off");
 static const string mStart("start");
 
 // global variables
-time_t timer;					//!< Variable to store the current time.
-struct tm* timeinfo;			//!< Variable that can hold the time as seperated values.
-ofstream logFile;				//!< handle for the log-file.
-int pingRes = 0;				//!< Result of the ping. Positive value means the round-trip time. Negative values means error in ping.
-int mWolTimeoutToDo = 0;		//!< Indicates how long we have to wait for another WOL. Can send WOL if <= 0.
-int serverRunning = -1;			//!< Indicator if server is running. -1 mean not initialized.
+time_t timer;						//!< Variable to store the current time.
+struct tm* timeinfo;				//!< Variable that can hold the time as seperated values.
+ofstream logFile;					//!< handle for the log-file.
+int pingRes = 0;					//!< Result of the ping. Positive value means the round-trip time. Negative values means error in ping.
+int mWolTimer = 0;					//!< Indicates how long we have to wait for another WOL. Can send WOL if <= 0.
+int serverRunning = -1;				//!< Indicator if server is running. -1 mean not initialized.
 int mShutdownTimer = 0;				//!< Indicates how long we have to wait until we can shutdown server. Can shutdown if <= 0.
 bool someClientsRunning = false;	//!< Indicator if at least one client is running.
 
@@ -107,14 +107,14 @@ static void logWithInt(string text, int num) {
 /*
  *	\brief	Method uses a WOL-package to start the server.
  */
-static void startServer() {
+static void startServerIfNotRunning() {
 	// only send WOL if server not running and WOL timeout has been expired
-	if (mWolTimeoutToDo <= 0 && serverRunning != 1) {
+	if (mWolTimer <= 0 && serverRunning != 1) {
 		int wolRes = sendWol(mServerMAC.c_str());
 		if (wolRes != 0) {
 			logWithInt("[error]\tWOL failed!", wolRes);
 		} else {
-			mWolTimeoutToDo = mWolTimeout;
+			mWolTimer = mWolTimeout;
 			log("[info]\tWOL sent");
 		}
 	}
@@ -180,7 +180,7 @@ void checkAndSignalServerState(int newState) {
 			// set server as running
 			serverRunning = 1;
 			// reset WOL timeout to ensure that next start approach executes immediately
-			mWolTimeoutToDo = 0;
+			mWolTimer = 0;
 		}
 	} else {
 		// server changed state to stopped
@@ -334,7 +334,7 @@ int main(int argc, char* argv[]) {
 
 		// remove start-file and start server if not already running
 		if (checkAndRemoveFile((mDirectory + mStart).c_str()) && serverRunning != 1) {
-			startServer();
+			startServerIfNotRunning();
 		}
 
 
@@ -342,8 +342,8 @@ int main(int argc, char* argv[]) {
 		// handle WOL timeout
 		//********************
 
-		if (mWolTimeoutToDo > 0) {
-			mWolTimeoutToDo -= mInterval;
+		if (mWolTimer > 0) {
+			mWolTimer -= mInterval;
 		}
 	}
 
