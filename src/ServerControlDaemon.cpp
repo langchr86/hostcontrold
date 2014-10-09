@@ -15,6 +15,10 @@
 #include <fstream>
 #include <time.h>
 
+#include<arpa/inet.h>
+#include<sys/socket.h>
+#include <string.h>
+
 #include "wol.h"
 #include "pinglib.h"
 #include "filehandling.h"
@@ -31,6 +35,7 @@ static const string mPath("/share/");
 static const string mServerName("lang-mainserver");
 static const string mServerIP("192.168.0.9");
 static const string mServerMAC("00:01:2E:31:64:FF");
+static const int	mServerPort(5555);
 
 // client settings
 static const int mNumClients = 4;
@@ -40,6 +45,7 @@ static const string mClientNameList[] = {"tv-wohnzimmer", "tv-schlafzimmer", "la
 // behaviour settings
 static const int mInterval = 1;
 static const int mWolTimeout = 10;
+static const int mShutdownTimeout = 100;
 
 // global constants
 static const string mSep("/");
@@ -56,6 +62,8 @@ ofstream logFile;				//!< handle for the log-file.
 int pingRes = 0;				//!< Result of the ping. Positive value means the round-trip time. Negative values means error in ping.
 int mWolTimeoutToDo = 0;		//!< Indicates how long we have to wait for another WOL. Can send WOL if <= 0.
 int serverRunning = -1;			//!< Indicator if server is running. -1 mean not initialized.
+int mShutdownTimer = 0;				//!< Indicates how long we have to wait until we can shutdown server. Can shutdown if <= 0.
+bool someClientsRunning = false;	//!< Indicator if at least one client is running.
 
 /*
  *	\brief	Writes new line into log-file. Each line starts with the current time stamp.
@@ -111,6 +119,45 @@ static void startServer() {
 		}
 	}
 }
+
+
+/*
+ *	\brief	Method uses a UDP-package to indicate the ShutdownDaemon on the server to shutdown the host.
+ *
+ * \param	test	Indicates if only a test packet will be sent to the server.
+ */
+static void shutdownServer(bool test = false) {
+	struct sockaddr_in si_other;
+    int s, slen=sizeof(si_other);
+    string message;
+
+    if ( (s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
+        log("[error]\tsocket could not be opened!");
+    }
+
+    memset((char *) &si_other, 0, sizeof(si_other));
+    si_other.sin_family = AF_INET;
+    si_other.sin_port = htons(mServerPort);
+
+    if (inet_aton(mServerIP.c_str(), &si_other.sin_addr) == 0) {
+		log("[error]\tlistening could not be started!");
+    }
+
+	// create message
+	if (test) {
+		message = "test";
+	} else {
+		message = "shutdown";
+	}
+
+	//send the message
+	if (sendto(s, message.c_str(), strlen(message.c_str()) , 0 , (struct sockaddr *) &si_other, slen)==-1) {
+		log("[error]\tpacket could not be sent!");
+	} else {
+		log("[info]\tshutdown packet sent: " + message);
+	}
+}
+
 
 /*
  *	\brief	Checks if state of server has changed and handles the
@@ -226,41 +273,57 @@ int main(int argc, char* argv[]) {
 		// check if client around
 		//************************
 
-		// only check if server not already running
-		if (serverRunning != 1) {
+		// concern that no clients are running
+		someClientsRunning = false;
 
-			// iterate over all possible clients
-			for (int c=0; c < mNumClients; ++c) {
+		// iterate over all possible clients
+		for (int c=0; c < mNumClients; ++c) {
 
-				// check if mNumClients too high
-				if (mClientIpList[c].compare("\0") == 0) {
-					logWithInt("[error]\tmNumClients too long!:\t", mNumClients);
-					break;
-				}
+			// check if mNumClients too high
+			if (mClientIpList[c].compare("\0") == 0) {
+				logWithInt("[error]\tmNumClients too long!:\t", mNumClients);
+				break;
+			}
 
-				// check if any client is running that needs the server
-				pingRes = ping(mClientIpList[c]);
+			// check if any client is running that needs the server
+			pingRes = ping(mClientIpList[c]);
 
-				// start server if a new running client has been found
-				if (pingRes > 0) {
-					#ifdef DEBUG
-						log("[debug]\tclient-ping > 0:\t" + mClientNameList[c]);
-					#endif
-					startServer();
+			// start server if a new running client has been found
+			if (pingRes > 0) {
+				#ifdef DEBUG
+					log("[debug]\tclient-ping > 0:\t" + mClientNameList[c]);
+				#endif
 
-					// not needed to check other clients
-					break;
+				// initialize shutdown time, signal that clients are running and start server
+				someClientsRunning = true;
+				mShutdownTimer = mShutdownTimeout;
+				startServerIfNotRunning();
 
-				// do nothing
-				} else if (pingRes == 0) {
-					#ifdef DEBUG
-						log("[debug]\tclient-ping == 0:\t" + mClientNameList[c]);
-					#endif
+				// not needed to check other clients
+				break;
 
-				// log failed ping
-				} else {
-					logWithInt("[error]\tclient-ping failed!:\t" + mClientNameList[c], pingRes);
-				}
+			// do nothing
+			} else if (pingRes == 0) {
+				#ifdef DEBUG
+					log("[debug]\tclient-ping == 0:\t" + mClientNameList[c]);
+				#endif
+
+			// log failed ping
+			} else {
+				logWithInt("[error]\tclient-ping failed!:\t" + mClientNameList[c], pingRes);
+			}
+		}
+
+		// evaluate if server has to be shutdown
+		if (someClientsRunning == false && serverRunning == 1) {
+
+			// shutdown the server
+			if (mShutdownTimer <= 0) {
+				shutdownServer();
+				mShutdownTimer = mShutdownTimeout;
+
+			} else {		// wait for timeout run out
+				mShutdownTimer -= mInterval;
 			}
 		}
 
