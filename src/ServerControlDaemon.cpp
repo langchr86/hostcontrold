@@ -54,6 +54,7 @@ static const string mLogName("log");
 static const string mOn("on");
 static const string mOff("off");
 static const string mStart("start");
+static const string mStop("stop");
 
 // global variables
 time_t timer;						//!< Variable to store the current time.
@@ -338,6 +339,11 @@ int main(int argc, char* argv[]) {
 		// remove start-file and start server if not already running
 		if (checkAndRemoveFile((mDirectory + mStart).c_str()) && serverRunning != 1) {
 			startServerIfNotRunning();
+		}
+
+		// remove stop-file and stop server if running
+		if (checkAndRemoveFile((mDirectory + mStop).c_str()) && serverRunning == 1) {
+			shutdownServerIfRunning();
 		}
 
 
