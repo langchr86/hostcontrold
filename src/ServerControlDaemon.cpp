@@ -126,19 +126,22 @@ static void startServerIfNotRunning() {
  *
  * \param	test	Indicates if only a test packet will be sent to the server.
  */
-static void shutdownServer(bool test = false) {
+static void shutdownServerIfRunning(bool test = false) {
+	// only send shutdown packet if server running
+	if (serverRunning != 1) return;
+
+	// try to open socket
 	struct sockaddr_in si_other;
     int s, slen=sizeof(si_other);
     string message;
-
     if ( (s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
         log("[error]\tsocket could not be opened!");
     }
 
+	// try to start listening on socket
     memset((char *) &si_other, 0, sizeof(si_other));
     si_other.sin_family = AF_INET;
     si_other.sin_port = htons(mServerPort);
-
     if (inet_aton(mServerIP.c_str(), &si_other.sin_addr) == 0) {
 		log("[error]\tlistening could not be started!");
     }
@@ -319,7 +322,7 @@ int main(int argc, char* argv[]) {
 
 			// shutdown the server
 			if (mShutdownTimer <= 0) {
-				shutdownServer();
+				shutdownServerIfRunning();
 				mShutdownTimer = mShutdownTimeout;
 
 			} else {		// wait for timeout run out
