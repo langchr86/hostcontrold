@@ -55,6 +55,8 @@ static const string mOn("on");
 static const string mOff("off");
 static const string mStart("start");
 static const string mStop("stop");
+static const string mKeepStarted("force_on");
+static const string mKeepStopped("force_off");
 
 // global variables
 time_t timer;						//!< Variable to store the current time.
@@ -335,9 +337,9 @@ int main(int argc, char* argv[]) {
 		}
 
 
-		//****************************
-		// check if start-file around
-		//****************************
+		//*******************************
+		// check if command-files around
+		//*******************************
 
 		// remove start-file and start server if not already running
 		if (checkAndRemoveFile((mDirectory + mStart).c_str()) && serverRunning != 1) {
