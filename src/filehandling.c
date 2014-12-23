@@ -2,6 +2,8 @@
 #include <dirent.h>
 #include <fstream>
 
+#include "filehandling.h"
+
 using namespace std;
 
 
@@ -25,12 +27,17 @@ int removeAllFiles(const char* path) {
 
 
 bool checkAndRemoveFile(const char * filepath) {
-	ifstream file(filepath);
-	bool check = file;
+	bool check = checkFile(filepath);
 	if (check) {
 		remove(filepath);
 	}
 	return check;
+}
+
+
+bool checkFile(const char * filepath) {
+	ifstream file(filepath);
+	return static_cast<bool>(file);
 }
 
 
