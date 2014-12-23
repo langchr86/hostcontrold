@@ -304,6 +304,9 @@ int main(int argc, char* argv[]) {
 				startServerIfNotRunning();
 
 				// not needed to check other clients
+				#ifdef DEBUG
+					logWithInt("[debug]\tskipped client-pings:\t", mNumClients - c - 1);
+				#endif
 				break;
 
 			// do nothing
