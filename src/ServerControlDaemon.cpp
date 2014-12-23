@@ -275,6 +275,33 @@ int main(int argc, char* argv[]) {
 		}
 
 
+		//*****************************
+		// check if force-files around
+		//*****************************
+
+		static const string mKeepStarted("force_on");
+		static const string mKeepStopped("force_off");
+
+		// remove force_on-file and start server if not already running
+		// force_on has higher priority the force_off
+		if (checkFile((mDirectory + mKeepStarted).c_str()) && serverRunning != 1) {
+			#ifdef DEBUG
+				log("[debug]\tforce_on file available");
+			#endif
+			startServerIfNotRunning();
+			continue;
+		}
+
+		// remove force_off-file and stop server if running
+		if (checkFile((mDirectory + mKeepStopped).c_str()) && serverRunning == 1) {
+			#ifdef DEBUG
+				log("[debug]\tforce_off file available");
+			#endif
+			shutdownServerIfRunning();
+			continue;
+		}
+
+
 		//************************
 		// check if client around
 		//************************
