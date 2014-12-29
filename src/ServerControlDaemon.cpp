@@ -282,9 +282,9 @@ int main(int argc, char* argv[]) {
 		static const string mKeepStarted("force_on");
 		static const string mKeepStopped("force_off");
 
-		// remove force_on-file and start server if not already running
+		// check force_on-file and start server if not already running
 		// force_on has higher priority the force_off
-		if (checkFile((mDirectory + mKeepStarted).c_str()) && serverRunning != 1) {
+		if (checkFile((mDirectory + mKeepStarted).c_str())) {
 			#ifdef DEBUG
 				log("[debug]\tforce_on file available");
 			#endif
@@ -292,8 +292,8 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 
-		// remove force_off-file and stop server if running
-		if (checkFile((mDirectory + mKeepStopped).c_str()) && serverRunning == 1) {
+		// check force_off-file and stop server if running
+		if (checkFile((mDirectory + mKeepStopped).c_str())) {
 			#ifdef DEBUG
 				log("[debug]\tforce_off file available");
 			#endif
