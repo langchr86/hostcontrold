@@ -38,9 +38,9 @@ static const string mServerMAC("00:01:2E:31:64:FF");
 static const int	mServerPort(5555);
 
 // client settings
-static const int mNumClients = 4;
-static const string mClientIpList[] = {"192.168.0.16", "192.168.0.22", "192.168.0.11", "192.168.0.18", "\0"};
-static const string mClientNameList[] = {"tv-wohnzimmer", "tv-schlafzimmer", "lang-zenon", "erdin-velin"};
+static const int mNumClients = 3;
+static const string mClientIpList[] = {"192.168.0.21", "192.168.0.25", "192.168.0.12", "\0"};
+static const string mClientNameList[] = {"tv-wohnzimmer", "lang-ct2014", "erdin-velin"};
 
 // behaviour settings
 static const int mInterval = 1;
