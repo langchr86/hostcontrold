@@ -32,9 +32,9 @@ using namespace std;
 
 // server settings
 static const string mPath("/share/");
-static const string mServerName("lang-mainserver");
-static const string mServerIP("192.168.0.9");
-static const string mServerMAC("00:01:2E:31:64:FF");
+static const string mServerName("lang-nas16");
+static const string mServerIP("192.168.0.7");
+static const string mServerMAC("40:8D:5C:B6:E6:50");
 static const int	mServerPort(5555);
 
 // client settings
