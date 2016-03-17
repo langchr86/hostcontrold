@@ -1,0 +1,12 @@
+Timeout error correcting by real time measuring
+
+Install of ping lib into makefie
+
+Make to cmake
+
+Static on with file in folder
+
+Static off with file in folder (maybe)
+
+
+Move to RelayControls GIT..
