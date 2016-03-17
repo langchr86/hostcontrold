@@ -36,6 +36,9 @@ static const string mServerName("lang-nas16");
 static const string mServerIP("192.168.0.7");
 static const string mServerMAC("40:8D:5C:B6:E6:50");
 static const int	mServerPort(5555);
+static const bool   mIsSshServer(false);
+static const string mSshUser("root");
+static const string mSshPassword("oaJl|5)Offs6");
 
 // client settings
 static const int mNumClients = 3;
@@ -132,6 +135,27 @@ static void startServerIfNotRunning() {
 static void shutdownServerIfRunning(bool test = false) {
 	// only send shutdown packet if server running
 	if (serverRunning != 1) return;
+
+	// do use SSH if available
+	// This needs a correct hash in ~/.ssh/known_hosts. This can be ensured by
+	// once manually connect via ssh as root to the remote host.
+	if (mIsSshServer) {
+		const string ssh_login = string("sshpass -p \"") + mSshPassword + string("\" ssh ") + mSshUser + string("@") + mServerIP;
+		#ifdef DEBUG
+			log("[debug]\tSSH login command: " + ssh_login);
+		#endif
+		FILE *ssh = popen(ssh_login.c_str(), "w");
+		if (ssh == NULL) {
+			log("[error]\tpopen failed!");
+			return;
+		}
+
+		fputs("shutdown -h now", ssh);
+
+		pclose(ssh);
+		log("[info]\tshutdown command via SSH executed");
+		return;
+	}
 
 	// try to open socket
 	struct sockaddr_in si_other;
