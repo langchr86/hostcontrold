@@ -34,9 +34,9 @@ using namespace std;
 static const string mPath("/share/");
 static const string mServerName("lang-nas16");
 static const string mServerIP("192.168.0.7");
-static const string mServerMAC("40:8D:5C:B6:E6:50");
+static const string mServerMAC("40:8D:5C:B6:E6:52");
 static const int	mServerPort(5555);
-static const bool   mIsSshServer(false);
+static const bool   mIsSshServer(true);
 static const string mSshUser("root");
 static const string mSshPassword("oaJl|5)Offs6");
 
