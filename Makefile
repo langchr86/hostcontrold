@@ -2,11 +2,10 @@ DIR_TARGET := bin
 DIR_SRC := src
 DIR_INIT := init.d
 FILE_TARGET := servercontroldaemon
-FILE_SRC := ServerControlDaemon.cpp
 FILE_INIT := servercontroldaemon
 INIT := $(DIR_INIT)/$(FILE_INIT)
 TARGET := 	$(DIR_TARGET)/$(FILE_TARGET)
-MAINFILE := $(DIR_SRC)/ServerControlDaemon.cpp
+MAINFILE := $(DIR_SRC)/main.cpp
 ADDFILES :=	$(DIR_SRC)/wol.c $(DIR_SRC)/pinglib.cpp $(DIR_SRC)/filehandling.c
 SOURCE :=	$(MAINFILE) $(ADDFILES)
 

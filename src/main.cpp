@@ -1,11 +1,3 @@
-/**
- * \file 		ServerControlDaemon.cpp
- *
- * \date 		06.05.2013
- * \author 		Christian Lang
- */
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -15,8 +7,8 @@
 #include <fstream>
 #include <time.h>
 
-#include<arpa/inet.h>
-#include<sys/socket.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 #include <string.h>
 
 #include "wol.h"
