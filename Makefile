@@ -6,7 +6,7 @@ FILE_INIT := servercontroldaemon
 INIT := $(DIR_INIT)/$(FILE_INIT)
 TARGET := 	$(DIR_TARGET)/$(FILE_TARGET)
 MAINFILE := $(DIR_SRC)/main.cpp
-ADDFILES :=	$(DIR_SRC)/wol.c $(DIR_SRC)/pinglib.cpp $(DIR_SRC)/filehandling.c
+ADDFILES :=	$(DIR_SRC)/wol.c $(DIR_SRC)/pinglib.cpp $(DIR_SRC)/filehandling.c $(DIR_SRC)/logger.cpp
 SOURCE :=	$(MAINFILE) $(ADDFILES)
 
 

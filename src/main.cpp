@@ -4,8 +4,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <string>
-#include <fstream>
-#include <time.h>
 
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -14,12 +12,13 @@
 #include "wol.h"
 #include "pinglib.h"
 #include "filehandling.h"
+#include "logger.h"
 
 
 using namespace std;
 
 
-//#define DEBUG
+// #define DEBUG
 
 
 // server settings
@@ -54,53 +53,12 @@ static const string mKeepStarted("force_on");
 static const string mKeepStopped("force_off");
 
 // global variables
-time_t timer;						//!< Variable to store the current time.
-struct tm* timeinfo;				//!< Variable that can hold the time as seperated values.
-ofstream logFile;					//!< handle for the log-file.
 int pingRes = 0;					//!< Result of the ping. Positive value means the round-trip time. Negative values means error in ping.
 int mWolTimer = 0;					//!< Indicates how long we have to wait for another WOL. Can send WOL if <= 0.
 int serverRunning = -1;				//!< Indicator if server is running. -1 mean not initialized.
 int mShutdownTimer = 0;				//!< Indicates how long we have to wait until we can shutdown server. Can shutdown if <= 0.
 bool someClientsRunning = false;	//!< Indicator if at least one client is running.
-
-/*
- *	\brief	Writes new line into log-file. Each line starts with the current time stamp.
- *
- *	\param	text	The custom log text.
- */
-static void log(string text) {
-	logFile.open((mDirectory + mLogName).c_str(), ios_base::out | ios_base::app);
-	if (logFile.is_open()) {
-		time(&timer);
-		timeinfo = localtime(&timer);
-		logFile << timeinfo->tm_mday << "." << timeinfo->tm_mon+1 << "." << timeinfo->tm_year+1900 << " ";
-		logFile << timeinfo->tm_hour << ":" << timeinfo->tm_min << ":" << timeinfo->tm_sec << "\t\t";
-		logFile << text << endl;
-		logFile.close();
-	} else {
-		return;
-	}
-}
-
-/*
- *	\brief	Writes new line into log-file. Each line starts with the current time stamp.
- *
- *	\param	text	The custom log text.
- *	\param	num		A custom integer that is added at the end of the log text.
- */
-static void logWithInt(string text, int num) {
-	logFile.open((mDirectory + mLogName).c_str(), ios_base::out | ios_base::app);
-	if (logFile.is_open()) {
-		time(&timer);
-		timeinfo = localtime(&timer);
-		logFile << timeinfo->tm_mday << "." << timeinfo->tm_mon+1 << "." << timeinfo->tm_year+1900 << " ";
-		logFile << timeinfo->tm_hour << ":" << timeinfo->tm_min << ":" << timeinfo->tm_sec << "\t\t";
-		logFile << text << " (" << num << ")" << endl;
-		logFile.close();
-	} else {
-		return;
-	}
-}
+Logger logger(mDirectory + mLogName);
 
 /*
  *	\brief	Method uses a WOL-package to start the server.
@@ -110,10 +68,10 @@ static void startServerIfNotRunning() {
 	if (mWolTimer <= 0 && serverRunning != 1) {
 		int wolRes = sendWol(mServerMAC.c_str());
 		if (wolRes != 0) {
-			logWithInt("[error]\tWOL failed!", wolRes);
+			logger.LogWithInt("[error]\tWOL failed!", wolRes);
 		} else {
 			mWolTimer = mWolTimeout;
-			log("[info]\tWOL sent");
+			logger.Log("[info]\tWOL sent");
 		}
 	}
 }
@@ -134,18 +92,18 @@ static void shutdownServerIfRunning(bool test = false) {
 	if (mIsSshServer) {
 		const string ssh_login = string("sshpass -p \"") + mSshPassword + string("\" ssh ") + mSshUser + string("@") + mServerIP;
 		#ifdef DEBUG
-			log("[debug]\tSSH login command: " + ssh_login);
+			logger.Log("[debug]\tSSH login command: " + ssh_login);
 		#endif
 		FILE *ssh = popen(ssh_login.c_str(), "w");
 		if (ssh == NULL) {
-			log("[error]\tpopen failed!");
+			logger.Log("[error]\tpopen failed!");
 			return;
 		}
 
 		fputs("shutdown -h now", ssh);
 
 		pclose(ssh);
-		log("[info]\tshutdown command via SSH executed");
+		logger.Log("[info]\tshutdown command via SSH executed");
 		return;
 	}
 
@@ -154,7 +112,7 @@ static void shutdownServerIfRunning(bool test = false) {
     int s, slen=sizeof(si_other);
     string message;
     if ( (s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
-        log("[error]\tsocket could not be opened!");
+        logger.Log("[error]\tsocket could not be opened!");
     }
 
 	// try to start listening on socket
@@ -162,7 +120,7 @@ static void shutdownServerIfRunning(bool test = false) {
     si_other.sin_family = AF_INET;
     si_other.sin_port = htons(mServerPort);
     if (inet_aton(mServerIP.c_str(), &si_other.sin_addr) == 0) {
-		log("[error]\tlistening could not be started!");
+		logger.Log("[error]\tlistening could not be started!");
     }
 
 	// create message
@@ -174,9 +132,9 @@ static void shutdownServerIfRunning(bool test = false) {
 
 	//send the message
 	if (sendto(s, message.c_str(), strlen(message.c_str()) , 0 , (struct sockaddr *) &si_other, slen)==-1) {
-		log("[error]\tpacket could not be sent!");
+		logger.Log("[error]\tpacket could not be sent!");
 	} else {
-		log("[info]\tshutdown packet sent: " + message);
+		logger.Log("[info]\tshutdown packet sent: " + message);
 	}
 }
 
@@ -189,13 +147,13 @@ static void shutdownServerIfRunning(bool test = false) {
  */
 void checkAndSignalServerState(int newState) {
 	if (newState < 0 || newState > 1) {
-		logWithInt("[error]\tWrong newState!", newState);
+		logger.LogWithInt("[error]\tWrong newState!", newState);
 
 	} else if (newState == 1) {
 		// server changed state to running
 		if (serverRunning != 1) {
 			// write log
-			log("[info]\tserver started");
+			logger.Log("[info]\tserver started");
 			// write on-file and delete off-file
 			createFile((mDirectory + mOn).c_str());
 			remove((mDirectory + mOff).c_str());
@@ -208,7 +166,7 @@ void checkAndSignalServerState(int newState) {
 		// server changed state to stopped
 		if (serverRunning != 0) {
 			// write log
-			log("[info]\tserver stopped");
+			logger.Log("[info]\tserver stopped");
 			// write off-file and delete on-file
 			createFile((mDirectory + mOff).c_str());
 			remove((mDirectory + mOn).c_str());
@@ -243,13 +201,13 @@ int main(int argc, char* argv[]) {
 	//set new session
 	pid_t sid = setsid();
 	if(sid < 0) {
-		log("[error]\tsession id failed!");
+		logger.Log("[error]\tsession id failed!");
 		exit(1);
 	}
 	
 	// Change the current working directory to root.
 	if (chdir("/") < 0) {
-		log("[error]\tchange dir failed!");
+		logger.Log("[error]\tchange dir failed!");
 		exit(1);
 	}
 
@@ -258,7 +216,7 @@ int main(int argc, char* argv[]) {
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
 	
-	log("[info]\tDaemon started");
+	logger.Log("[info]\tDaemon started");
 
 	
 	while (1) {	
@@ -274,20 +232,20 @@ int main(int argc, char* argv[]) {
 		// server running
 		if (pingRes > 0) {
 			#ifdef DEBUG
-				log("[debug]\tserver-ping > 0:\t" + mServerIP);
+				logger.Log("[debug]\tserver-ping > 0:\t" + mServerIP);
 			#endif
 			checkAndSignalServerState(1);
 
 		// server not running
 		} else if (pingRes == 0) {
 			#ifdef DEBUG
-				log("[debug]\tserver-ping == 0:\t" + mServerIP);
+				logger.Log("[debug]\tserver-ping == 0:\t" + mServerIP);
 			#endif
 			checkAndSignalServerState(0);
 
 		// log failed ping
 		} else {
-			logWithInt("[error]\tserver-ping failed!:\t" + mServerIP, pingRes);
+			logger.LogWithInt("[error]\tserver-ping failed!:\t" + mServerIP, pingRes);
 		}
 
 
@@ -302,7 +260,7 @@ int main(int argc, char* argv[]) {
 		// force_on has higher priority the force_off
 		if (checkFile((mDirectory + mKeepStarted).c_str())) {
 			#ifdef DEBUG
-				log("[debug]\tforce_on file available");
+				logger.Log("[debug]\tforce_on file available");
 			#endif
 			startServerIfNotRunning();
 			continue;
@@ -311,7 +269,7 @@ int main(int argc, char* argv[]) {
 		// check force_off-file and stop server if running
 		if (checkFile((mDirectory + mKeepStopped).c_str())) {
 			#ifdef DEBUG
-				log("[debug]\tforce_off file available");
+				logger.Log("[debug]\tforce_off file available");
 			#endif
 			shutdownServerIfRunning();
 			continue;
@@ -330,7 +288,7 @@ int main(int argc, char* argv[]) {
 
 			// check if mNumClients too high
 			if (mClientIpList[c].compare("\0") == 0) {
-				logWithInt("[error]\tmNumClients too long!:\t", mNumClients);
+				logger.LogWithInt("[error]\tmNumClients too long!:\t", mNumClients);
 				break;
 			}
 
@@ -340,7 +298,7 @@ int main(int argc, char* argv[]) {
 			// start server if a new running client has been found
 			if (pingRes > 0) {
 				#ifdef DEBUG
-					log("[debug]\tclient-ping > 0:\t" + mClientNameList[c]);
+					logger.Log("[debug]\tclient-ping > 0:\t" + mClientNameList[c]);
 				#endif
 
 				// initialize shutdown time, signal that clients are running and start server
@@ -350,19 +308,19 @@ int main(int argc, char* argv[]) {
 
 				// not needed to check other clients
 				#ifdef DEBUG
-					logWithInt("[debug]\tskipped client-pings:\t", mNumClients - c - 1);
+					logger.LogWithInt("[debug]\tskipped client-pings:\t", mNumClients - c - 1);
 				#endif
 				break;
 
 			// do nothing
 			} else if (pingRes == 0) {
 				#ifdef DEBUG
-					log("[debug]\tclient-ping == 0:\t" + mClientNameList[c]);
+					logger.Log("[debug]\tclient-ping == 0:\t" + mClientNameList[c]);
 				#endif
 
 			// log failed ping
 			} else {
-				logWithInt("[error]\tclient-ping failed!:\t" + mClientNameList[c], pingRes);
+				logger.LogWithInt("[error]\tclient-ping failed!:\t" + mClientNameList[c], pingRes);
 			}
 		}
 
