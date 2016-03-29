@@ -10,7 +10,7 @@ ADDFILES :=	$(DIR_SRC)/wol.c $(DIR_SRC)/pinglib.cpp $(DIR_SRC)/filehandling.c $(
 SOURCE :=	$(MAINFILE) $(ADDFILES)
 
 
-CC :=		g++
+CC :=		g++ -std=c++0x
 
 FLAG_WARN :=	-W -Wall -Wswitch -Wformat -Wchar-subscripts \
 		-Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith \
