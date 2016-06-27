@@ -53,9 +53,9 @@ int main(int argc, char* argv[]) {
 	nas16_config.shutdown_timeout = std::chrono::minutes(10);
 
 	ServerControl::ClientList nas16_clients;
-	nas16_clients.emplace_back("192.168.0.21", "tv-wohnzimmer");
+	nas16_clients.emplace_back("192.168.0.87", "tv-wohnzimmer");
 	nas16_clients.emplace_back("192.168.0.25", "lang-ct2014");
-	nas16_clients.emplace_back("192.168.0.12", "erdin-velin");
+	nas16_clients.emplace_back("192.168.0.152", "erdin-velin");
 
 	ServerControl nas16("/share/lang-nas16/", nas16_config, nas16_clients);
 
