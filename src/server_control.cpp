@@ -117,7 +117,7 @@ void ServerControl::ShutdownServerIfRunning() {
 void ServerControl::ShutdownWithSsh() {
 	// do use SSH if available
 	// This needs a correct hash in ~/.ssh/known_hosts. This can be ensured by
-	// once manually connect via ssh as root to the remote host.
+	// once manually connect via ssh as root to the remote host. It needs the tool sshpass.
 	const string ssh_login = string("sshpass -p \"")
 			+ config_.ssh_password + string("\" ssh ")
 			+ kSshUser + string("@") + config_.ip;
