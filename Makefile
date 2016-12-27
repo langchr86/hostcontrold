@@ -1,8 +1,8 @@
 DIR_TARGET := bin
 DIR_SRC := src
-DIR_INIT := init.d
+DIR_INIT := systemd
 FILE_TARGET := servercontroldaemon
-FILE_INIT := servercontroldaemon
+FILE_INIT := servercontroldaemon.service
 INIT := $(DIR_INIT)/$(FILE_INIT)
 TARGET := 	$(DIR_TARGET)/$(FILE_TARGET)
 MAINFILE := $(DIR_SRC)/main.cpp
@@ -35,23 +35,26 @@ default:
 	
 install: stop $(TARGET)
 	sudo apt-get install sshpass
-	sudo cp $(INIT) /etc/init.d/$(FILE_INIT)
-	sudo chmod +x /etc/init.d/$(FILE_INIT)
+	sudo cp $(INIT) /etc/systemd/system/$(FILE_INIT)
+	sudo chmod +x /etc/systemd/system/$(FILE_INIT)
 	sudo cp $(TARGET) /usr/sbin/$(FILE_TARGET)
 	sudo chmod +x /usr/sbin/$(FILE_TARGET)
 	
 remove: stop
-	sudo rm /etc/init.d/$(FILE_INIT)
+	sudo rm /etc/systemd/system/$(FILE_INIT)
 	sudo rm /usr/sbin/$(FILE_TARGET)
 	
-start: /etc/init.d/$(FILE_INIT)
-	sudo service $(FILE_TARGET) start
+start: /etc/systemd/system/$(FILE_INIT)
+	sudo systemctl start $(FILE_INIT)
 	
-restart: /etc/init.d/$(FILE_INIT)
-	sudo service $(FILE_TARGET) restart
+restart: /etc/systemd/system/$(FILE_INIT)
+	sudo systemctl restart $(FILE_INIT)
 	
-stop:
-	-sudo killall -q $(FILE_TARGET)
+stop: /etc/systemd/system/$(FILE_INIT)
+	sudo systemctl stop $(FILE_INIT)
+
+status: /etc/systemd/system/$(FILE_INIT)
+	sudo systemctl status $(FILE_INIT)
 
 $(TARGET):
 	$(CC) $(FLAGS_C) -o $(TARGET) $(SOURCE) $(PATHS) $(LIBRARIES)

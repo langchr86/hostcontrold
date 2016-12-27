@@ -1,0 +1,9 @@
+[Unit]
+Description=Server Control Daemon
+
+[Service]
+ExecStart=/usr/sbin/servercontroldaemon
+User=root
+
+[Install]
+WantedBy=multi-user.target

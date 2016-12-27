@@ -17,6 +17,7 @@ int main(int argc, char* argv[]) {
 	// setup main logger
 	Logger logger("/share/ServerControl.log");
 
+/*
 	//unmasking the file mode
 	umask(0);
 
@@ -37,6 +38,7 @@ int main(int argc, char* argv[]) {
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
+	*/
 	
 	logger.Log("[info]\tDaemon started");
 
