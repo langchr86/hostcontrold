@@ -99,7 +99,9 @@ void ServerControl::StartServerIfNotRunning() {
 		logger_.Log("[error]\tWOL failed!");
 	}
 
-	logger_.Log("[info]\tWOL sent");
+	#ifdef DEBUG
+		logger_.Log("[debug]\tWOL sent");
+	#endif
 }
 
 void ServerControl::ShutdownServerIfRunning() {
@@ -133,7 +135,9 @@ void ServerControl::ShutdownWithSsh() {
 	fputs("shutdown -h now", ssh);
 
 	pclose(ssh);
-	logger_.Log("[info]\tshutdown command via SSH executed");
+	#ifdef DEBUG
+		logger_.Log("[debug]\tshutdown command via SSH executed");
+	#endif
 	return;
 }
 
@@ -160,7 +164,9 @@ void ServerControl::ShutdownWithUdp() {
 	if (sendto(s, message.c_str(), strlen(message.c_str()) , 0 , (struct sockaddr *) &si_other, slen)==-1) {
 		logger_.Log("[error]\tpacket could not be sent!");
 	} else {
-		logger_.Log("[info]\tshutdown packet sent: " + message);
+		#ifdef DEBUG
+			logger_.Log("[debug]\tshutdown packet sent: " + message);
+		#endif
 	}
 }
 
