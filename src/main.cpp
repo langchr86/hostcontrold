@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
 	ServerControl::Config nas16_config;
 	nas16_config.ip = "192.168.0.7";
 	nas16_config.mac = "40:8D:5C:B6:E6:52";
-	nas16_config.ssh_password = "oaJl|5)Offs6";
+	nas16_config.ssh_user = "clang";
 	nas16_config.shutdown_use_ssh = true;
 	nas16_config.control_interval = std::chrono::seconds(5);
 	nas16_config.shutdown_timeout = std::chrono::minutes(10);
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
 	ServerControl::Config nas08_config;
 	nas08_config.ip = "192.168.0.9";
 	nas08_config.mac = "00:01:2E:31:64:FF";
-	nas08_config.ssh_password = "oaJl|5)Offs6";
+	nas08_config.ssh_user = "clang";
 	nas08_config.shutdown_use_ssh = true;
 	nas08_config.control_interval = std::chrono::seconds(30);
 	nas08_config.shutdown_timeout = std::chrono::minutes(1);

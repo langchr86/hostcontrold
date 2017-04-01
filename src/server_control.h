@@ -16,7 +16,6 @@ using std::chrono::system_clock;
 
 class ServerControl {
 	static const int kServerPort;
-	static const string kSshUser;
 	static const string kFileOn;
 	static const string kFileOff;
 	static const string kFileKeepOn;
@@ -26,7 +25,7 @@ public:
 	struct Config {
 		string ip;
 		string mac;
-		string ssh_password;
+		string ssh_user;
 		bool shutdown_use_ssh;
 		seconds control_interval;
 		seconds shutdown_timeout;

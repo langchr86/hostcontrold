@@ -12,7 +12,6 @@
 // #define DEBUG
 
 const int ServerControl::kServerPort = 5555;
-const string ServerControl::kSshUser = "root";
 const string ServerControl::kFileOn = "on";
 const string ServerControl::kFileOff = "off";
 const string ServerControl::kFileKeepOn = "force_on";
@@ -119,10 +118,11 @@ void ServerControl::ShutdownServerIfRunning() {
 void ServerControl::ShutdownWithSsh() {
 	// do use SSH if available
 	// This needs a correct hash in ~/.ssh/known_hosts. This can be ensured by
-	// once manually connect via ssh as root to the remote host. It needs the tool sshpass.
-	const string ssh_login = string("sshpass -p \"")
-			+ config_.ssh_password + string("\" ssh ")
-			+ kSshUser + string("@") + config_.ip;
+	// once manually connect via ssh as root to the remote host. In addition the root user needs a not
+	// passphrase secured rsa-key that allowes him to connect to the remote. Ensure to configure
+	// the correct user of the remote.
+	const string ssh_login = string("ssh ")
+			+ config_.ssh_user + string("@") + config_.ip;
 	#ifdef DEBUG
 		logger_.Log("[debug]\tSSH login command: " + ssh_login);
 	#endif
@@ -132,7 +132,7 @@ void ServerControl::ShutdownWithSsh() {
 		return;
 	}
 
-	fputs("shutdown -h now", ssh);
+	fputs("sudo shutdown -h now", ssh);
 
 	pclose(ssh);
 	#ifdef DEBUG

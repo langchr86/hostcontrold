@@ -34,7 +34,6 @@ default:
 	$(CC) $(FLAGS_C) -o $(TARGET) $(SOURCE) $(PATHS) $(LIBRARIES)
 	
 install: stop $(TARGET)
-	sudo apt-get install sshpass
 	sudo cp $(INIT) /etc/systemd/system/$(FILE_INIT)
 	sudo chmod +x /etc/systemd/system/$(FILE_INIT)
 	sudo cp $(TARGET) /usr/sbin/$(FILE_TARGET)
