@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
 	nas16_clients.emplace_back("192.168.0.66", "tv-wohnzimmer");
 	nas16_clients.emplace_back("192.168.0.25", "lang-ct2014");
 	nas16_clients.emplace_back("192.168.0.152", "erdin-velin");
-	nas16_clients.emplace_back("192.168.0.192", "lang-asusnet");
+	nas16_clients.emplace_back("192.168.0.213", "lang-xps13");
 
 	ServerControl nas16("/share/lang-nas16/", nas16_config, nas16_clients);
 
