@@ -1,4 +1,4 @@
-C++
+# C++
 #########################
 
 # Compiled Object files
@@ -31,7 +31,7 @@ C++
 *.app
 
 
-Autotools
+# Autotools
 #########################
 # http://www.gnu.org/software/automake
 
@@ -77,12 +77,13 @@ m4/lt~obsolete.m4
 autom4te.cache
 
 
-eclipse
+# eclipse
 #########################
 
 .settings/
 
 
-
-bin/
+# custom
+#########################
 build/
+libs/liboping
