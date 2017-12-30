@@ -37,6 +37,7 @@ set_target_properties(${HC_APP} PROPERTIES COMPILE_FLAGS "${HC_CFLAGS}")
 set_target_properties(${HC_APP} PROPERTIES CXX_STANDARD 14)
 
 # link to dependencies
+add_dependencies(${HC_APP} liboping)
 target_link_libraries(${HC_APP}
   "${CMAKE_CURRENT_SOURCE_DIR}/libs/liboping/lib/liboping.a"
 )
