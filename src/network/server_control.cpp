@@ -5,9 +5,9 @@
 #include <sys/socket.h>
 #include <string.h>
 
-#include "wol.h"
-#include "pinglib.h"
-#include "filehandling.h"
+#include "network/wol.h"
+#include "network/pinglib.h"
+#include "utils/filehandling.h"
 
 // #define DEBUG
 

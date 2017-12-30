@@ -3,8 +3,8 @@
 
 #include <thread>
 
-#include "logger.h"
-#include "server_control.h"
+#include "utils/logger.h"
+#include "network/server_control.h"
 
 
 int main(int argc, char* argv[]) {
