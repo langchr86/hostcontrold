@@ -1,3 +1,0 @@
-TYPEMAP
-pingobj_t *		T_PTROBJ
-pingobj_iter_t *	T_PTROBJ
