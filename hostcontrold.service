@@ -1,0 +1,9 @@
+[Unit]
+Description=Host Control Daemon
+
+[Service]
+ExecStart=/usr/sbin/hostcontrold
+User=root
+
+[Install]
+WantedBy=multi-user.target
