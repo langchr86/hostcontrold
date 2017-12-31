@@ -96,6 +96,8 @@ private:
 	 *	\param	newState	The current state of the server at call time.
 	 */
 	void CheckAndSignalServerState(const bool& newState);
+
+    int Ping(const std::string& ip) const;
 };
 
 #endif /* SRC_SERVER_CONTROL_H_ */
