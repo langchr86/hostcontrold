@@ -14,6 +14,10 @@ ExternalProject_Add(liboping
   BUILD_IN_SOURCE 1
 )
 
+# find external dependencies
+find_package(PkgConfig REQUIRED)
+pkg_search_module(SYSTEMD REQUIRED libsystemd)
+
 # collect sources
 file(GLOB SRC_MAIN "src/main.cpp")
 file(GLOB_RECURSE SRC_CHECKED "src/*.c*" "src/*.h*")
@@ -28,6 +32,7 @@ add_executable(${HC_APP}
 # include directories
 target_include_directories(${HC_APP} PRIVATE
   "libs/liboping/src"
+  ${SYSTEMD_INCLUDE_DIRS}
   "src"
 )
 
@@ -40,6 +45,7 @@ set_target_properties(${HC_APP} PROPERTIES CXX_STANDARD 14)
 add_dependencies(${HC_APP} liboping)
 target_link_libraries(${HC_APP}
   "${CMAKE_CURRENT_SOURCE_DIR}/libs/liboping/lib/liboping.a"
+  ${SYSTEMD_LIBRARIES}
 )
 
 # install steps
