@@ -1,18 +1,8 @@
-#include <sys/stat.h>
-#include <unistd.h>
-
 #include <thread>
 
-#include "utils/logger.h"
 #include "network/server_control.h"
 
-
 int main(int argc, char* argv[]) {
-
-// setup main logger
-//*******************
-	Logger logger("/share/ServerControl.log");
-	logger.Log("[info]\tDaemon started");
 
 
 // main server
