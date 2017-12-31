@@ -39,18 +39,18 @@ static const SdJournalLogger<>& GetLogger() {
   return logger;
 }
 
-bool WakeOnLan::SendWol(const std::string &mac) {
+bool WakeOnLan::SendWol(const std::string& mac) {
   int i, j;
   int packet;
   struct sockaddr_in sap;
   unsigned char ethaddr[8];
-  unsigned char *ptr;
+  unsigned char* ptr;
   unsigned char buf[128];
   int optval = 1;
 
   /* Fetch the hardware address. */
   if (ConvertMacStringToBinary(mac, ethaddr) == false) {
-    GetLogger().SdLogErr("Invalid hardware address: %s" , mac.c_str());
+    GetLogger().SdLogErr("Invalid hardware address: %s", mac.c_str());
     return false;
   }
 
@@ -81,7 +81,7 @@ bool WakeOnLan::SendWol(const std::string &mac) {
       *ptr++ = ethaddr[i];
 
   /* Send the packet out */
-  if (sendto(packet, buf, 102, 0, (struct sockaddr *) &sap, sizeof(sap)) < 0) {
+  if (sendto(packet, buf, 102, 0, (struct sockaddr*) &sap, sizeof(sap)) < 0) {
     GetLogger().SdLogErr("sendto failed, %s", std::strerror(errno));
     close(packet);
     return false;
@@ -91,7 +91,7 @@ bool WakeOnLan::SendWol(const std::string &mac) {
   return true;
 }
 
-bool WakeOnLan::ConvertMacStringToBinary(const std::string &mac_string, unsigned char *mac_binary) {
+bool WakeOnLan::ConvertMacStringToBinary(const std::string& mac_string, unsigned char* mac_binary) {
   char c;
   auto read_iterator = mac_string.cbegin();
   unsigned val;

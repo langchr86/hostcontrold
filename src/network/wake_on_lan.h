@@ -12,10 +12,7 @@ class WakeOnLan {
 
  private:
   /// Input an Ethernet address and convert to binary.
-  static bool ConvertMacStringToBinary (const std::string& mac_string, unsigned char * mac_binary);
+  static bool ConvertMacStringToBinary(const std::string& mac_string, unsigned char* mac_binary);
 };
 
 #endif  // NETWORK_WAKE_ON_LAN_H_
-
-
-int sendWol(const char* addr);
