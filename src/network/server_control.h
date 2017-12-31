@@ -98,8 +98,8 @@ class ServerControl {
   void CheckAndSignalServerState(const bool& newState);
 
   int Ping(const std::string& ip) const;
-  bool CheckFile(const char* filepath) const;
-  bool CreateFile(const char* filepath) const;
+  bool CheckFile(const std::string& filepath) const;
+  bool CreateFile(const std::string& filepath) const;
 };
 
 #endif /* SRC_SERVER_CONTROL_H_ */

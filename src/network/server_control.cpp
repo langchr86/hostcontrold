@@ -54,7 +54,7 @@ void ServerControl::DoWork() {
 
   // check force_on-file and start server if not already running
   // force_on has higher priority than force_off
-  if (CheckFile((control_dir_ + kFileKeepOn).c_str())) {
+  if (CheckFile(control_dir_ + kFileKeepOn)) {
 #ifdef DEBUG
     logger_.Log("[debug]\tforce_on file available");
 #endif
@@ -64,7 +64,7 @@ void ServerControl::DoWork() {
   }
 
   // check force_off-file and stop server if running
-  if (CheckFile((control_dir_ + kFileKeepOff).c_str())) {
+  if (CheckFile(control_dir_ + kFileKeepOff)) {
 #ifdef DEBUG
     logger_.Log("[debug]\tforce_off file available");
 #endif
@@ -251,12 +251,12 @@ int ServerControl::Ping(const std::string& ip) const {
   }
 }
 
-bool ServerControl::CheckFile(const char* filepath) const {
+bool ServerControl::CheckFile(const std::string& filepath) const {
 	std::ifstream file(filepath);
 	return static_cast<bool>(file);
 }
 
-bool ServerControl::CreateFile(const char* filepath) const {
+bool ServerControl::CreateFile(const std::string& filepath) const {
 	std::ifstream file(filepath);
 	bool check = !file;
 	if (check) {
