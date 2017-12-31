@@ -32,6 +32,7 @@ add_executable(${HC_APP}
 # include directories
 target_include_directories(${HC_APP} PRIVATE
   "libs/liboping/src"
+  "libs/json/src"
   ${SYSTEMD_INCLUDE_DIRS}
   "src"
 )
