@@ -35,7 +35,7 @@
 #include "utils/sd_journal_logger.hpp"
 
 static const SdJournalLogger<>& GetLogger() {
-  static SdJournalLogger<> logger("wake_on_lan.cpp", "WakeOnLan", {});
+  static SdJournalLogger<> logger(__FILE__, "WakeOnLan", {});
   return logger;
 }
 
