@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "network/wol.h"
+#include "network/wake_on_lan.h"
 #include "network/pinglib.h"
 #include "utils/filehandling.h"
 
@@ -92,7 +92,7 @@ void ServerControl::StartServerIfNotRunning() {
 	}
 
 	// send WOL packet
-	if (sendWol(config_.mac.c_str()) != 0) {
+	if (WakeOnLan::SendWol(config_.mac) == false) {
 		logger_.Log("[error]\tWOL failed!");
 	}
 
