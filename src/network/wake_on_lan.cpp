@@ -29,8 +29,15 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#include <string.h>
+#include <cstring>
 #include <unistd.h>
+
+#include "utils/sd_journal_logger.hpp"
+
+static const SdJournalLogger<>& GetLogger() {
+  static SdJournalLogger<> logger("wake_on_lan.cpp", "WakeOnLan", {});
+  return logger;
+}
 
 bool WakeOnLan::SendWol(const std::string &mac) {
   int i, j;
@@ -43,19 +50,19 @@ bool WakeOnLan::SendWol(const std::string &mac) {
 
   /* Fetch the hardware address. */
   if (ConvertMacStringToBinary(mac, ethaddr) == false) {
-    fprintf(stderr, "wol.c: invalid hardware address\n");
+    GetLogger().SdLogErr("Invalid hardware address: %s" , mac.c_str());
     return false;
   }
 
   /* setup the packet socket */
   if ((packet = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
-    fprintf(stderr, "wol.c: socket failed\n");
+    GetLogger().SdLogErr("Socket failed.");
     return false;
   }
 
   /* Set socket options */
   if (setsockopt(packet, SOL_SOCKET, SO_BROADCAST, (caddr_t) &optval, sizeof(optval)) < 0) {
-    fprintf(stderr, "wol.c: setsocket failed %s\n", strerror(errno));
+    GetLogger().SdLogErr("setsocket failed: %s", std::strerror(errno));
     close(packet);
     return false;
   }
@@ -75,7 +82,7 @@ bool WakeOnLan::SendWol(const std::string &mac) {
 
   /* Send the packet out */
   if (sendto(packet, buf, 102, 0, (struct sockaddr *) &sap, sizeof(sap)) < 0) {
-    fprintf(stderr, "wol.c: sendto failed, %s\n", strerror(errno));
+    GetLogger().SdLogErr("sendto failed, %s", std::strerror(errno));
     close(packet);
     return false;
   }
@@ -101,7 +108,7 @@ bool WakeOnLan::ConvertMacStringToBinary(const std::string &mac_string, unsigned
     } else if (c >= 'A' && c <= 'F') {
       val = c - 'A' + 10;
     } else {
-      fprintf(stderr, "in_ether(%s): invalid ether address!\n", mac_string.c_str());
+      GetLogger().SdLogErr("Invalid ether address: %s", mac_string.c_str());
       return false;
     }
 
@@ -117,7 +124,7 @@ bool WakeOnLan::ConvertMacStringToBinary(const std::string &mac_string, unsigned
     } else if (c == ':' || c == 0) {
       val >>= 4;
     } else {
-      fprintf(stderr, "in_ether(%s): invalid ether address!\n", mac_string.c_str());
+      GetLogger().SdLogErr("Invalid ether address: %s", mac_string.c_str());
       return false;
     }
 
