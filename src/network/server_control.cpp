@@ -16,10 +16,11 @@ const string ServerControl::kFileKeepOn = "force_on";
 const string ServerControl::kFileKeepOff = "force_off";
 
 ServerControl::ServerControl(const string& control_dir, const Config& config, const ClientList& client_list)
-    : logger_(control_dir + "/log"),
-      control_dir_(control_dir + "/"),
-      config_(config),
-      client_list_(client_list) {
+    : control_dir_(control_dir + "/")
+    , config_(config)
+    , client_list_(client_list)
+    , logger_(__FILE__, "ServerControl", {"%s"} , &config_.ip)
+{
   // create directory
   const int status = mkdir(control_dir_.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
   if (status != 0) {
@@ -55,9 +56,7 @@ void ServerControl::DoWork() {
   // check force_on-file and start server if not already running
   // force_on has higher priority than force_off
   if (CheckFile(control_dir_ + kFileKeepOn)) {
-#ifdef DEBUG
-    logger_.Log("[debug]\tforce_on file available");
-#endif
+    logger_.SdLogDebug("force_on file available");
     StartServerIfNotRunning();
     last_client_ = current_time;
     return;
@@ -65,9 +64,7 @@ void ServerControl::DoWork() {
 
   // check force_off-file and stop server if running
   if (CheckFile(control_dir_ + kFileKeepOff)) {
-#ifdef DEBUG
-    logger_.Log("[debug]\tforce_off file available");
-#endif
+    logger_.SdLogDebug("force_off file available");
     ShutdownServerIfRunning();
     return;
   }
@@ -93,12 +90,10 @@ void ServerControl::StartServerIfNotRunning() {
 
   // send WOL packet
   if (WakeOnLan::SendWol(config_.mac) == false) {
-    logger_.Log("[error]\tWOL failed!");
+    logger_.SdLogErr("WOL failed!");
   }
 
-#ifdef DEBUG
-  logger_.Log("[debug]\tWOL sent");
-#endif
+  logger_.SdLogDebug("WOL sent");
 }
 
 void ServerControl::ShutdownServerIfRunning() {
@@ -116,21 +111,17 @@ void ServerControl::ShutdownWithSsh() {
   // the correct user of the remote.
   const string ssh_login = string("ssh ")
       + config_.ssh_user + string("@") + config_.ip;
-#ifdef DEBUG
-  logger_.Log("[debug]\tSSH login command: " + ssh_login);
-#endif
+  logger_.SdLogDebug("SSH login command: %s", ssh_login.c_str());
   FILE* ssh = popen(ssh_login.c_str(), "w");
   if (ssh == NULL) {
-    logger_.Log("[error]\tpopen failed!");
+    logger_.SdLogErr("popen failed!");
     return;
   }
 
   fputs("sudo shutdown -h now", ssh);
 
   pclose(ssh);
-#ifdef DEBUG
-  logger_.Log("[debug]\tshutdown command via SSH executed");
-#endif
+  logger_.SdLogDebug("shutdown command via SSH executed");
   return;
 }
 
@@ -140,21 +131,17 @@ void ServerControl::PingServer() {
 
   // server running
   if (pingRes > 0) {
-#ifdef DEBUG
-    logger_.Log("[debug]\tserver-ping > 0:\t" + config_.ip);
-#endif
+    logger_.SdLogDebug("server-ping > 0");
     CheckAndSignalServerState(true);
 
     // server not running
   } else if (pingRes == 0) {
-#ifdef DEBUG
-    logger_.Log("[debug]\tserver-ping == 0:\t" + config_.ip);
-#endif
+    logger_.SdLogDebug("server-ping == 0");
     CheckAndSignalServerState(false);
 
     // log failed ping
   } else {
-    logger_.LogWithInt("[error]\tserver-ping failed!:\t" + config_.ip, pingRes);
+    logger_.SdLogErr("server-ping failed: %i", pingRes);
   }
 }
 
@@ -165,21 +152,17 @@ bool ServerControl::CheckClients() {
 
     // client answer
     if (pingRes > 0) {
-#ifdef DEBUG
-      logger_.Log("[debug]\tclient-ping > 0:\t" + it->description);
-      logger_.Log("skip other pings");
-#endif
+      logger_.SdLogDebug("client-ping > 0: %s", it->description.c_str());
+      logger_.SdLogDebug("skip other pings");
       return true;
 
       // no answer
     } else if (pingRes == 0) {
-#ifdef DEBUG
-      logger_.Log("[debug]\tclient-ping == 0:\t" + it->description);
-#endif
+      logger_.SdLogDebug("client-ping == 0: %s", it->description.c_str());
 
       // log failed ping
     } else {
-      logger_.LogWithInt("[error]\tclient-ping failed!:\t" + it->description, pingRes);
+      logger_.SdLogErr("client-ping failed: %s, %i", it->description.c_str(), pingRes);
     }
   }
 
@@ -191,7 +174,7 @@ void ServerControl::CheckAndSignalServerState(const bool& newState) {
   if (newState) {
     // server changed state to running
     if (running_ == false) {
-      logger_.Log("[info]\tserver started");
+      logger_.SdLogInfo("server started");
 
       // write on-file and delete off-file
       CreateFile((control_dir_ + kFileOn).c_str());
@@ -201,7 +184,7 @@ void ServerControl::CheckAndSignalServerState(const bool& newState) {
   } else {
     // server changed state to stopped
     if (running_) {
-      logger_.Log("[info]\tserver stopped");
+      logger_.SdLogInfo("server stopped");
 
       // write off-file and delete on-file
       CreateFile((control_dir_ + kFileOff).c_str());

@@ -6,8 +6,7 @@
 #include <string>
 #include <vector>
 #include <chrono>
-
-#include "utils/logger.h"
+#include <utils/sd_journal_logger.hpp>
 
 using std::string;
 using std::vector;
@@ -50,7 +49,7 @@ class ServerControl {
   void DoWork();
 
  private:
-  Logger logger_;
+  SdJournalLogger<std::string> logger_;
 
   const string control_dir_;
   const Config config_;
