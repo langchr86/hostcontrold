@@ -152,17 +152,16 @@ bool ServerControl::CheckClients() {
 
     // client answer
     if (pingRes > 0) {
-      logger_.SdLogDebug("client-ping > 0: %s", it->description.c_str());
-      logger_.SdLogDebug("skip other pings");
+      logger_.SdLogDebug("Client(%s) has answered. Skip other pings.", it->description.c_str());
       return true;
 
       // no answer
     } else if (pingRes == 0) {
-      logger_.SdLogDebug("client-ping == 0: %s", it->description.c_str());
+      logger_.SdLogDebug("Client(%s) does not answer.", it->description.c_str());
 
-      // log failed ping
+      // ping failed
     } else {
-      logger_.SdLogErr("client-ping failed: %s, %i", it->description.c_str(), pingRes);
+      logger_.SdLogErr("client-ping(%s) failed: %i", it->description.c_str(), pingRes);
     }
   }
 
