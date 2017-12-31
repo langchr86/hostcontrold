@@ -21,7 +21,6 @@ int main(int argc, char* argv[]) {
 	nas16_config.ip = "192.168.0.6";
 	nas16_config.mac = "40:8D:5C:B6:E6:52";
 	nas16_config.ssh_user = "clang";
-	nas16_config.shutdown_use_ssh = true;
 	nas16_config.control_interval = std::chrono::seconds(5);
 	nas16_config.shutdown_timeout = std::chrono::minutes(10);
 
@@ -40,7 +39,6 @@ int main(int argc, char* argv[]) {
 	nas08_config.ip = "192.168.0.5";
 	nas08_config.mac = "00:01:2E:31:64:FF";
 	nas08_config.ssh_user = "clang";
-	nas08_config.shutdown_use_ssh = true;
 	nas08_config.control_interval = std::chrono::seconds(10);
 	nas08_config.shutdown_timeout = std::chrono::minutes(1);
 

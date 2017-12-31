@@ -1,8 +1,6 @@
 #include "server_control.h"
 
 #include <stdio.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
 #include <string.h>
 
 #include "network/wol.h"
@@ -107,12 +105,7 @@ void ServerControl::ShutdownServerIfRunning() {
 	if (running_ == false) {
 		return;
 	}
-
-	if (config_.shutdown_use_ssh) {
-		ShutdownWithSsh();
-	} else {
-		ShutdownWithUdp();
-	}
+	ShutdownWithSsh();
 }
 
 void ServerControl::ShutdownWithSsh() {
@@ -139,35 +132,6 @@ void ServerControl::ShutdownWithSsh() {
 		logger_.Log("[debug]\tshutdown command via SSH executed");
 	#endif
 	return;
-}
-
-void ServerControl::ShutdownWithUdp() {
-	// try to open socket
-	struct sockaddr_in si_other;
-    int s, slen=sizeof(si_other);
-    if ( (s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
-        logger_.Log("[error]\tsocket could not be opened!");
-    }
-
-	// try to start listening on socket
-    memset((char *) &si_other, 0, sizeof(si_other));
-    si_other.sin_family = AF_INET;
-    si_other.sin_port = htons(kServerPort);
-    if (inet_aton(config_.ip.c_str(), &si_other.sin_addr) == 0) {
-		logger_.Log("[error]\tlistening could not be started!");
-    }
-
-	// create message
-    const string message = "shutdown";
-
-	//send the message
-	if (sendto(s, message.c_str(), strlen(message.c_str()) , 0 , (struct sockaddr *) &si_other, slen)==-1) {
-		logger_.Log("[error]\tpacket could not be sent!");
-	} else {
-		#ifdef DEBUG
-			logger_.Log("[debug]\tshutdown packet sent: " + message);
-		#endif
-	}
 }
 
 void ServerControl::PingServer() {

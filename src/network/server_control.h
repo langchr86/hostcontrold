@@ -26,7 +26,6 @@ public:
 		string ip;
 		string mac;
 		string ssh_user;
-		bool shutdown_use_ssh;
 		seconds control_interval;
 		seconds shutdown_timeout;
 
@@ -79,13 +78,6 @@ private:
 	 * 	once manually connect via ssh as root to the remote host.
 	 */
 	void ShutdownWithSsh();
-
-	/**
-	 * \brief	Do use UDP packet for remote shutdown.
-	 *
-	 * 	This needs a correctly installed UDP client on the remote machine.
-	 */
-	void ShutdownWithUdp();
 
 	/**
 	 * \brief Evaluate server state.
