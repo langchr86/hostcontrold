@@ -1,9 +1,11 @@
 #include "server_control.h"
 
+#include <sys/stat.h>
+#include <fstream>
+
 #include <oping.h>
 
 #include "network/wake_on_lan.h"
-#include "utils/filehandling.h"
 
 // #define DEBUG
 
@@ -52,7 +54,7 @@ void ServerControl::DoWork() {
 
   // check force_on-file and start server if not already running
   // force_on has higher priority than force_off
-  if (checkFile((control_dir_ + kFileKeepOn).c_str())) {
+  if (CheckFile((control_dir_ + kFileKeepOn).c_str())) {
 #ifdef DEBUG
     logger_.Log("[debug]\tforce_on file available");
 #endif
@@ -62,7 +64,7 @@ void ServerControl::DoWork() {
   }
 
   // check force_off-file and stop server if running
-  if (checkFile((control_dir_ + kFileKeepOff).c_str())) {
+  if (CheckFile((control_dir_ + kFileKeepOff).c_str())) {
 #ifdef DEBUG
     logger_.Log("[debug]\tforce_off file available");
 #endif
@@ -192,7 +194,7 @@ void ServerControl::CheckAndSignalServerState(const bool& newState) {
       logger_.Log("[info]\tserver started");
 
       // write on-file and delete off-file
-      createFile((control_dir_ + kFileOn).c_str());
+      CreateFile((control_dir_ + kFileOn).c_str());
       remove((control_dir_ + kFileOff).c_str());
       running_ = true;
     }
@@ -202,7 +204,7 @@ void ServerControl::CheckAndSignalServerState(const bool& newState) {
       logger_.Log("[info]\tserver stopped");
 
       // write off-file and delete on-file
-      createFile((control_dir_ + kFileOff).c_str());
+      CreateFile((control_dir_ + kFileOff).c_str());
       remove((control_dir_ + kFileOn).c_str());
       running_ = false;
     }
@@ -249,3 +251,17 @@ int ServerControl::Ping(const std::string& ip) const {
   }
 }
 
+bool ServerControl::CheckFile(const char* filepath) const {
+	std::ifstream file(filepath);
+	return static_cast<bool>(file);
+}
+
+bool ServerControl::CreateFile(const char* filepath) const {
+	std::ifstream file(filepath);
+	bool check = !file;
+	if (check) {
+		std::ofstream newFile(filepath);
+		newFile.close();
+	}
+	return check;
+}
