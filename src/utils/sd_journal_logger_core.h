@@ -1,5 +1,5 @@
-#ifndef COMMON_SD_JOURNAL_LOGGER_CORE_H_
-#define COMMON_SD_JOURNAL_LOGGER_CORE_H_
+#ifndef UTILS_SD_JOURNAL_LOGGER_CORE_H_
+#define UTILS_SD_JOURNAL_LOGGER_CORE_H_
 
 /**
  * \brief Base class that contains some core functionality that is central to SdJournalLogger.
@@ -15,4 +15,4 @@ class SdJournalLoggerCore {
   static int max_priority_;
 };
 
-#endif  // COMMON_SD_JOURNAL_LOGGER_CORE_H_
+#endif  // UTILS_SD_JOURNAL_LOGGER_CORE_H_

@@ -1,5 +1,5 @@
-#ifndef COMMON_SD_JOURNAL_LOGGER_HPP_
-#define COMMON_SD_JOURNAL_LOGGER_HPP_
+#ifndef UTILS_SD_JOURNAL_LOGGER_HPP_
+#define UTILS_SD_JOURNAL_LOGGER_HPP_
 
 #include <systemd/sd-journal.h>
 
@@ -10,7 +10,7 @@
 #include <utility>
 #include <array>
 
-#include "common/sd_journal_logger_core.h"
+#include "utils/sd_journal_logger_core.h"
 
 /**
  * \brief Logging wrapper for sd-journal.
@@ -167,21 +167,21 @@ class SdJournalLogger : private SdJournalLoggerCore {
   static const char * GetLogLevelText(int priority) {
     switch (priority) {
       case LOG_EMERG:
-        return "EMERG";
+        return "EMER";
       case LOG_ALERT:
-        return "ALERT";
+        return "ALER";
       case LOG_CRIT:
-        return "CRITICAL";
+        return "CRIT";
       case LOG_ERR:
-        return "ERROR";
+        return "ERRO";
       case LOG_WARNING:
         return "WARN";
       case LOG_NOTICE:
-        return "NOTICE";
+        return "NOTI";
       case LOG_INFO:
         return "INFO";
       case LOG_DEBUG:
-        return "DEBUG";
+        return "DEBU";
       default:
         return "UNKNOWN";
     }
@@ -199,4 +199,4 @@ class SdJournalLogger : private SdJournalLoggerCore {
 #define SdLogAlert(...)   SdLog(LOG_ALERT, __VA_ARGS__)
 #define SdLogEmerg(...)   SdLog(LOG_EMERG, __VA_ARGS__)
 
-#endif  // COMMON_SD_JOURNAL_LOGGER_HPP_
+#endif  // UTILS_SD_JOURNAL_LOGGER_HPP_
