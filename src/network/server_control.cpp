@@ -139,7 +139,7 @@ void ServerControl::PingServer() {
 
 bool ServerControl::CheckClients() {
   // check if any client is runnning
-  for (ClientList::const_iterator it = client_list_.begin(); it != client_list_.end(); ++it) {
+  for (auto it = client_list_.cbegin(); it != client_list_.cend(); ++it) {
     const int pingRes = Ping(it->ip);
 
     // client answer
