@@ -103,8 +103,7 @@ void ServerControl::ShutdownWithSsh() {
   // once manually connect via ssh as root to the remote host. In addition the root user needs a not
   // passphrase secured rsa-key that allowes him to connect to the remote. Ensure to configure
   // the correct user of the remote.
-  const string ssh_login = string("ssh ")
-      + config_.ssh_user + string("@") + config_.ip;
+  const string ssh_login = string("ssh ") + config_.ssh_user + string("@") + config_.ip;
   logger_.SdLogDebug("SSH login command: %s", ssh_login.c_str());
   FILE* ssh = popen(ssh_login.c_str(), "w");
   if (ssh == nullptr) {
@@ -227,16 +226,16 @@ int ServerControl::Ping(const std::string& ip) const {
 }
 
 bool ServerControl::CheckFile(const std::string& filepath) const {
-	std::ifstream file(filepath);
-	return static_cast<bool>(file);
+  std::ifstream file(filepath);
+  return static_cast<bool>(file);
 }
 
 bool ServerControl::CreateFile(const std::string& filepath) const {
-	std::ifstream file(filepath);
-	bool check = !file;
-	if (check) {
-		std::ofstream newFile(filepath);
-		newFile.close();
-	}
-	return check;
+  std::ifstream file(filepath);
+  bool check = !file;
+  if (check) {
+    std::ofstream newFile(filepath);
+    newFile.close();
+  }
+  return check;
 }
