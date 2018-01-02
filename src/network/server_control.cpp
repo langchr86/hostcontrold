@@ -7,10 +7,10 @@
 
 #include "network/wake_on_lan.h"
 
-const string ServerControl::kFileOn = "on";
-const string ServerControl::kFileOff = "off";
-const string ServerControl::kFileKeepOn = "force_on";
-const string ServerControl::kFileKeepOff = "force_off";
+const char ServerControl::kFileOn[] = "on";
+const char ServerControl::kFileOff[] = "off";
+const char ServerControl::kFileKeepOn[] = "force_on";
+const char ServerControl::kFileKeepOff[] = "force_off";
 
 ServerControl::ServerControl(const string& control_dir, const Config& config, const ClientList& client_list)
     : control_dir_(control_dir + "/")
@@ -169,7 +169,7 @@ void ServerControl::CheckAndSignalServerState(const bool& newState) {
       logger_.SdLogInfo("server started");
 
       // write on-file and delete off-file
-      CreateFile((control_dir_ + kFileOn).c_str());
+      CreateFile(control_dir_ + kFileOn);
       remove((control_dir_ + kFileOff).c_str());
       running_ = true;
     }
@@ -179,7 +179,7 @@ void ServerControl::CheckAndSignalServerState(const bool& newState) {
       logger_.SdLogInfo("server stopped");
 
       // write off-file and delete on-file
-      CreateFile((control_dir_ + kFileOff).c_str());
+      CreateFile(control_dir_ + kFileOff);
       remove((control_dir_ + kFileOn).c_str());
       running_ = false;
     }

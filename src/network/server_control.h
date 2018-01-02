@@ -14,10 +14,10 @@ using std::chrono::seconds;
 using std::chrono::system_clock;
 
 class ServerControl {
-  static const string kFileOn;
-  static const string kFileOff;
-  static const string kFileKeepOn;
-  static const string kFileKeepOff;
+  static const char kFileOn[];
+  static const char kFileOff[];
+  static const char kFileKeepOn[];
+  static const char kFileKeepOff[];
 
  public:
   struct Config {
