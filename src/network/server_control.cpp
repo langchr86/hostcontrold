@@ -125,12 +125,12 @@ void ServerControl::PingServer() {
 
   // server running
   if (pingRes > 0) {
-    logger_.SdLogDebug("server-ping > 0");
+    logger_.SdLogDebug("server-ping: host is running");
     CheckAndSignalServerState(true);
 
     // server not running
   } else if (pingRes == 0) {
-    logger_.SdLogDebug("server-ping == 0");
+    logger_.SdLogDebug("server-ping: host does not answer");
     CheckAndSignalServerState(false);
 
     // log failed ping
@@ -216,14 +216,14 @@ int ServerControl::Ping(const std::string& ip) const {
     return -5;    // error
   }
 
-  // delete ressources
+  // delete resources
   ping_destroy(obj);
 
   // return result
   if (latency < 0.0) {
     return 0;    // timeout
   } else {
-    return 1;    // ping reply recieved
+    return 1;    // ping reply received
   }
 }
 
