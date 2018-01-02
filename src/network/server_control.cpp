@@ -18,10 +18,12 @@ ServerControl::ServerControl(const string& control_dir, const Config& config, co
     , client_list_(client_list)
     , logger_(__FILE__, "ServerControl", {"%s"} , &config_.ip)
 {
+  logger_.SdLogInfo("Start controlling server.");
+
   // create directory
   const int status = mkdir(control_dir_.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
   if (status != 0) {
-    // error or already there
+    logger_.SdLogDebug("Folder already exists: %s", control_dir_.c_str());
   }
 
   // remove old files
