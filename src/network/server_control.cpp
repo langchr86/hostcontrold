@@ -107,7 +107,7 @@ void ServerControl::ShutdownWithSsh() {
       + config_.ssh_user + string("@") + config_.ip;
   logger_.SdLogDebug("SSH login command: %s", ssh_login.c_str());
   FILE* ssh = popen(ssh_login.c_str(), "w");
-  if (ssh == NULL) {
+  if (ssh == nullptr) {
     logger_.SdLogErr("popen failed!");
     return;
   }
@@ -208,7 +208,7 @@ int ServerControl::Ping(const std::string& ip) const {
   double latency = -1.0;
   size_t buffer_len = sizeof(latency);
 
-  if (iter == NULL) {
+  if (iter == nullptr) {
     return -4;    // error
   }
   if (ping_iterator_get_info(iter, PING_INFO_LATENCY, &latency, &buffer_len) < 0) {
