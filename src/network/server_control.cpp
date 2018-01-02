@@ -16,7 +16,7 @@ ServerControl::ServerControl(const string& control_dir, const Config& config, co
     : control_dir_(control_dir + "/")
     , config_(config)
     , client_list_(client_list)
-    , logger_(__FILE__, "ServerControl", {"%s"} , &config_.ip)
+    , logger_(__FILE__, "ServerControl", {"IP=%s"}, &config_.ip)
 {
   logger_.SdLogInfo("Start controlling server.");
 
