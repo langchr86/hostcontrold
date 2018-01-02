@@ -16,9 +16,9 @@ ServerControl::ServerControl(const string& control_dir, const Config& config, co
     : control_dir_(control_dir + "/")
     , config_(config)
     , client_list_(client_list)
-    , logger_(__FILE__, "ServerControl", {"IP=%s"}, &config_.ip)
+    , logger_(__FILE__, "ServerControl", {"HOST=%s"}, &config_.name)
 {
-  logger_.SdLogInfo("Start controlling server.");
+  logger_.SdLogInfo("Start controlling host: %s", config_.name.c_str());
 
   // create directory
   const int status = mkdir(control_dir_.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);

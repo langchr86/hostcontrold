@@ -21,6 +21,7 @@ class ServerControl {
 
  public:
   struct Config {
+    string name;
     string ip;
     string mac;
     string ssh_user;
