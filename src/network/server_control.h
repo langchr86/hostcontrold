@@ -14,7 +14,6 @@ using std::chrono::seconds;
 using std::chrono::system_clock;
 
 class ServerControl {
-  static const int kServerPort;
   static const string kFileOn;
   static const string kFileOff;
   static const string kFileKeepOn;
@@ -41,7 +40,6 @@ class ServerControl {
   typedef vector<Machine> ClientList;
 
   ServerControl(const string& control_dir, const Config& config, const ClientList& client_list);
-  virtual ~ServerControl();
 
   /**
    * \brief The main work method for each instance. The method returns after each iteration.

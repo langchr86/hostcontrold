@@ -7,9 +7,6 @@
 
 #include "network/wake_on_lan.h"
 
-// #define DEBUG
-
-const int ServerControl::kServerPort = 5555;
 const string ServerControl::kFileOn = "on";
 const string ServerControl::kFileOff = "off";
 const string ServerControl::kFileKeepOn = "force_on";
@@ -37,9 +34,6 @@ ServerControl::ServerControl(const string& control_dir, const Config& config, co
 
   // ensure shutdown timeout will be respected if service starts fresh
   last_client_ = system_clock::now();
-}
-
-ServerControl::~ServerControl() {
 }
 
 void ServerControl::DoWork() {
@@ -122,7 +116,6 @@ void ServerControl::ShutdownWithSsh() {
 
   pclose(ssh);
   logger_.SdLogDebug("shutdown command via SSH executed");
-  return;
 }
 
 void ServerControl::PingServer() {
