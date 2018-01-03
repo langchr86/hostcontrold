@@ -19,6 +19,7 @@ class ServerControl {
 
  public:
   explicit ServerControl(const ServerControlConfig& config);
+  explicit ServerControl(ServerControl&& other);
 
   /**
    * \brief The main work method for each instance. The method returns after each iteration.

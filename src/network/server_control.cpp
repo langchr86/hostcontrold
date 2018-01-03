@@ -36,6 +36,12 @@ ServerControl::ServerControl(const ServerControlConfig& config)
   last_client_ = std::chrono::system_clock::now();
 }
 
+ServerControl::ServerControl(ServerControl&& other)
+    : config_(other.config_)
+    , logger_(__FILE__, "ServerControl", {"HOST=%s"}, &config_.name)
+    , running_(other.running_)
+{}
+
 void ServerControl::DoWork() {
   // do work only in defined interval
   const auto current_time = std::chrono::system_clock::now();
