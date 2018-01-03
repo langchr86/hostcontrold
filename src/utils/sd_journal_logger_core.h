@@ -11,7 +11,7 @@ class SdJournalLoggerCore {
     max_priority_ = max;
   }
 
- private:
+ protected:
   static int max_priority_;
 };
 
