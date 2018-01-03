@@ -9,6 +9,7 @@
 #include <tuple>
 #include <utility>
 #include <array>
+#include <regex>
 
 #include "utils/sd_journal_logger_core.h"
 
@@ -62,7 +63,15 @@ class SdJournalLogger : private SdJournalLoggerCore {
       : file_name_(file_name)
       , class_name_(class_name)
       , context_formatters_(context_formatters)
-      , context_pointers_(context_pointers...) {
+      , context_pointers_(context_pointers...)
+  {
+    // ensure correct formatters
+    const std::regex expression("[A-Z_]*=%.*");
+    for (const auto& format : context_formatters) {
+      if (std::regex_match(format, expression) == false) {
+        sd_journal_print(LOG_ERR, "Context formatter \"%s\" does not match form: \"VAR_NAME=%%i\".", format.c_str());
+      }
+    }
   }
 
   /**
