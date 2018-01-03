@@ -1,6 +1,7 @@
 <component name="InspectionProjectProfileManager">
   <profile version="1.0">
     <option name="myName" value="Project Default" />
+    <inspection_tool class="EndlessLoop" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="OCSimplifyInspection" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="enableSimplifyEqualToYesNo" value="false" />
     </inspection_tool>
