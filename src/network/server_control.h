@@ -6,12 +6,10 @@
 #include <string>
 #include <vector>
 #include <chrono>
+
 #include <utils/sd_journal_logger.hpp>
 
-using std::string;
-using std::vector;
-using std::chrono::seconds;
-using std::chrono::system_clock;
+#include "network/server_control_config.h"
 
 class ServerControl {
   static const char kFileOn[];
@@ -20,27 +18,7 @@ class ServerControl {
   static const char kFileKeepOff[];
 
  public:
-  struct Config {
-    string name;
-    string ip;
-    string mac;
-    string ssh_user;
-    seconds control_interval;
-    seconds shutdown_timeout;
-
-  };
-
-  struct Machine {
-    Machine(const string& i, const string& d)
-        : ip(i), description(d) {
-    }
-    string ip;
-    string description;
-  };
-
-  typedef vector<Machine> ClientList;
-
-  ServerControl(const string& control_dir, const Config& config, const ClientList& client_list);
+  explicit ServerControl(const ServerControlConfig& config);
 
   /**
    * \brief The main work method for each instance. The method returns after each iteration.
@@ -49,15 +27,11 @@ class ServerControl {
 
  private:
   SdJournalLogger<std::string> logger_;
-
-  const string control_dir_;
-  const Config config_;
-  const ClientList client_list_;
-
+  const ServerControlConfig config_;
   bool running_;
 
-  system_clock::time_point last_control_;
-  system_clock::time_point last_client_;
+  std::chrono::system_clock::time_point last_control_;
+  std::chrono::system_clock::time_point last_client_;
 
   /*
    *	\brief	Method uses a WOL-package to start the server.

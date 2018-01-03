@@ -1,50 +1,61 @@
 #include <thread>
+#include <fstream>
 
+#include "json.hpp"
+
+#include "utils/sd_journal_logger.hpp"
 #include "network/server_control.h"
+#include "network/server_control_config.h"
+
+using json = nlohmann::json;
+using namespace std::chrono_literals;
+
+static constexpr char config_path[] = "/etc/hostcontrold.conf";
 
 int main(int argc, char* argv[]) {
+  SdJournalLogger<> logger(__FILE__, "Main", {});
 
+  // read config file
+  json config;
+  std::vector<ServerControl> controllers;
+  std::ifstream config_stream(config_path);
 
-// main server
-//*************
-	ServerControl::Config nas16_config;
-	nas16_config.name = "lang-nas16";
-	nas16_config.ip = "192.168.0.6";
-	nas16_config.mac = "40:8D:5C:B6:E6:52";
-	nas16_config.ssh_user = "clang";
-	nas16_config.control_interval = std::chrono::seconds(5);
-	nas16_config.shutdown_timeout = std::chrono::minutes(10);
+  // create example config if no file exists
+  if (config_stream.is_open() == false) {
+    logger.SdLogErr("Found no config file under: %s", config_path);
 
-	ServerControl::ClientList nas16_clients;
-	nas16_clients.emplace_back("192.168.0.66", "tv-wohnzimmer");
-	nas16_clients.emplace_back("192.168.0.25", "lang-ct2014");
-	nas16_clients.emplace_back("192.168.0.152", "erdin-velin");
-	nas16_clients.emplace_back("192.168.0.213", "lang-xps13");
+    ServerControlConfig example_config =
+        {"lang-nas16", "192.168.0.6", "40:8D:5C:B6:E6:52", "clang", "/share/lang-nas16/", 5s, 10min};
+    example_config.clients.emplace_back("lang-xps13", "192.168.0.213");
+    example_config.clients.emplace_back("lang-ct2014", "192.168.0.25");
+    config.push_back(example_config);
 
-	ServerControl nas16("/share/lang-nas16/", nas16_config, nas16_clients);
+    std::ofstream new_config_stream(config_path);
+    new_config_stream << config.dump(2);
+    logger.SdLogInfo("Created example config file under: %s", config_path);
+    return 1;
+  }
 
+  // parse config file
+  logger.SdLogInfo("Found existing config file under: %s", config_path);
+  try {
+    config_stream >> config;
+  } catch (const nlohmann::detail::parse_error& e) {
+    logger.SdLogErr("Config parse error: %s", e.what());
+    return 1;
+  }
 
-// backup server
-//***************
-	ServerControl::Config nas08_config;
-	nas08_config.name = "lang-nas08";
-	nas08_config.ip = "192.168.0.5";
-	nas08_config.mac = "00:01:2E:31:64:FF";
-	nas08_config.ssh_user = "clang";
-	nas08_config.control_interval = std::chrono::seconds(10);
-	nas08_config.shutdown_timeout = std::chrono::minutes(1);
+  // create configured controllers
+  for (const auto& config_object : config) {
+    const ServerControlConfig control_config(config_object);
+    controllers.emplace_back(control_config);
+  }
 
-	ServerControl::ClientList nas08_clients;
-
-	ServerControl nas08("/share/lang-nas08/", nas08_config, nas08_clients);
-
-
-// work loop
-//***********
-	while (true) {
-		nas16.DoWork();
-		nas08.DoWork();
-
-		std::this_thread::sleep_for(seconds(1));
-	}
+  // main loop
+  while (true) {
+    for (auto& controller : controllers) {
+      controller.DoWork();
+    }
+    std::this_thread::sleep_for(1s);
+  }
 }

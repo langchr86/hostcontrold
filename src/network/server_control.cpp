@@ -12,35 +12,33 @@ const char ServerControl::kFileOff[] = "off";
 const char ServerControl::kFileKeepOn[] = "force_on";
 const char ServerControl::kFileKeepOff[] = "force_off";
 
-ServerControl::ServerControl(const string& control_dir, const Config& config, const ClientList& client_list)
-    : control_dir_(control_dir + "/")
-    , config_(config)
-    , client_list_(client_list)
+ServerControl::ServerControl(const ServerControlConfig& config)
+    : config_(config)
     , logger_(__FILE__, "ServerControl", {"HOST=%s"}, &config_.name)
 {
   logger_.SdLogInfo("Start controlling host: %s", config_.name.c_str());
 
   // create directory
-  const int status = mkdir(control_dir_.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+  const int status = mkdir(config_.control_dir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
   if (status != 0) {
-    logger_.SdLogDebug("Folder already exists: %s", control_dir_.c_str());
+    logger_.SdLogDebug("Folder already exists: %s", config_.control_dir.c_str());
   }
 
   // remove old files
-  remove((control_dir_ + kFileOn).c_str());
-  remove((control_dir_ + kFileOff).c_str());
+  remove((config_.control_dir + kFileOn).c_str());
+  remove((config_.control_dir + kFileOff).c_str());
 
   // force reset server state to off
   running_ = true;
   CheckAndSignalServerState(false);
 
   // ensure shutdown timeout will be respected if service starts fresh
-  last_client_ = system_clock::now();
+  last_client_ = std::chrono::system_clock::now();
 }
 
 void ServerControl::DoWork() {
   // do work only in defined interval
-  const system_clock::time_point current_time = system_clock::now();
+  const auto current_time = std::chrono::system_clock::now();
   if (last_control_ + config_.control_interval > current_time) {
     return;
   }
@@ -51,7 +49,7 @@ void ServerControl::DoWork() {
 
   // check force_on-file and start server if not already running
   // force_on has higher priority than force_off
-  if (CheckFile(control_dir_ + kFileKeepOn)) {
+  if (CheckFile(config_.control_dir + kFileKeepOn)) {
     logger_.SdLogDebug("force_on file available");
     StartServerIfNotRunning();
     last_client_ = current_time;
@@ -59,7 +57,7 @@ void ServerControl::DoWork() {
   }
 
   // check force_off-file and stop server if running
-  if (CheckFile(control_dir_ + kFileKeepOff)) {
+  if (CheckFile(config_.control_dir + kFileKeepOff)) {
     logger_.SdLogDebug("force_off file available");
     ShutdownServerIfRunning();
     return;
@@ -105,7 +103,7 @@ void ServerControl::ShutdownWithSsh() {
   // once manually connect via ssh as root to the remote host. In addition the root user needs a not
   // passphrase secured rsa-key that allowes him to connect to the remote. Ensure to configure
   // the correct user of the remote.
-  const string ssh_login = string("ssh ") + config_.ssh_user + string("@") + config_.ip;
+  const auto ssh_login = std::string("ssh ") + config_.ssh_user + "@" + config_.ip;
   logger_.SdLogDebug("SSH login command: %s", ssh_login.c_str());
   FILE* ssh = popen(ssh_login.c_str(), "w");
   if (ssh == nullptr) {
@@ -141,21 +139,21 @@ void ServerControl::PingServer() {
 
 bool ServerControl::CheckClients() {
   // check if any client is runnning
-  for (auto it = client_list_.cbegin(); it != client_list_.cend(); ++it) {
+  for (auto it = config_.clients.cbegin(); it != config_.clients.cend(); ++it) {
     const int pingRes = Ping(it->ip);
 
     // client answer
     if (pingRes > 0) {
-      logger_.SdLogDebug("Client(%s) has answered. Skip other pings.", it->description.c_str());
+      logger_.SdLogDebug("Client(%s) has answered. Skip other pings.", it->name.c_str());
       return true;
 
       // no answer
     } else if (pingRes == 0) {
-      logger_.SdLogDebug("Client(%s) does not answer.", it->description.c_str());
+      logger_.SdLogDebug("Client(%s) does not answer.", it->name.c_str());
 
       // ping failed
     } else {
-      logger_.SdLogErr("client-ping(%s) failed: %i", it->description.c_str(), pingRes);
+      logger_.SdLogErr("client-ping(%s) failed: %i", it->name.c_str(), pingRes);
     }
   }
 
@@ -170,8 +168,8 @@ void ServerControl::CheckAndSignalServerState(const bool& newState) {
       logger_.SdLogInfo("server started");
 
       // write on-file and delete off-file
-      CreateFile(control_dir_ + kFileOn);
-      remove((control_dir_ + kFileOff).c_str());
+      CreateFile(config_.control_dir + kFileOn);
+      remove((config_.control_dir + kFileOff).c_str());
       running_ = true;
     }
   } else {
@@ -180,8 +178,8 @@ void ServerControl::CheckAndSignalServerState(const bool& newState) {
       logger_.SdLogInfo("server stopped");
 
       // write off-file and delete on-file
-      CreateFile(control_dir_ + kFileOff);
-      remove((control_dir_ + kFileOn).c_str());
+      CreateFile(config_.control_dir + kFileOff);
+      remove((config_.control_dir + kFileOn).c_str());
       running_ = false;
     }
   }
