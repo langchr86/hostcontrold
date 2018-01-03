@@ -26,8 +26,8 @@ class ServerControl {
   void DoWork();
 
  private:
-  SdJournalLogger<std::string> logger_;
   const ServerControlConfig config_;
+  SdJournalLogger<std::string> logger_;
   bool running_;
 
   std::chrono::system_clock::time_point last_control_;
