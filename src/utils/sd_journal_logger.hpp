@@ -74,6 +74,11 @@ class SdJournalLogger : private SdJournalLoggerCore {
     }
   }
 
+  /// \attention Do not allow to copy logger with pointers to possible old variables.
+  SdJournalLogger(const SdJournalLogger&) = delete;
+  /// \attention Do not allow to copy logger with pointers to possible old variables.
+  SdJournalLogger& operator= (const SdJournalLogger&) = delete;
+
   /**
    * \brief Do the logging with the log message formatter string and the arguments.
    *
