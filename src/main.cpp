@@ -4,6 +4,7 @@
 #include "json.hpp"
 
 #include "utils/sd_journal_logger.hpp"
+#include "utils/sd_journal_logger_core.h"
 #include "network/server_control.h"
 #include "network/server_control_config.h"
 
@@ -13,6 +14,8 @@ using namespace std::chrono_literals;
 static constexpr char config_path[] = "/etc/hostcontrold.conf";
 
 int main(int argc, char* argv[]) {
+  SdJournalLoggerCore::SetMaxLogPriority(LOG_INFO);
+
   SdJournalLogger<> logger(__FILE__, "Main", {});
 
   // read config file
