@@ -1,5 +1,4 @@
-#ifndef SRC_NETWORK_SERVER_CONTROL_CONFIG_H_
-#define SRC_NETWORK_SERVER_CONTROL_CONFIG_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -28,10 +27,8 @@ class ServerControlConfig {
   std::vector<Machine> clients;
 };
 
-void to_json(nlohmann::json& j, const ServerControlConfig::Machine& p);
-void from_json(const nlohmann::json& j, ServerControlConfig::Machine& p);
-
-void to_json(nlohmann::json& j, const ServerControlConfig& p);
-void from_json(const nlohmann::json& j, ServerControlConfig& p);
-
-#endif  // SRC_NETWORK_SERVER_CONTROL_CONFIG_H_
+// conversion functions used by JSON library
+void to_json(nlohmann::json& json, const ServerControlConfig::Machine& config);     // NOLINT[runtime/references]
+void from_json(const nlohmann::json& json, ServerControlConfig::Machine& config);   // NOLINT[runtime/references]
+void to_json(nlohmann::json& json, const ServerControlConfig& config);              // NOLINT[runtime/references]
+void from_json(const nlohmann::json& json, ServerControlConfig& config);            // NOLINT[runtime/references]

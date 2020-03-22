@@ -1,5 +1,4 @@
-#ifndef UTILS_SD_JOURNAL_LOGGER_HPP_
-#define UTILS_SD_JOURNAL_LOGGER_HPP_
+#pragma once
 
 #include <systemd/sd-journal.h>
 
@@ -211,5 +210,3 @@ class SdJournalLogger : private SdJournalLoggerCore {
 #define SdLogCrit(...)    SdLog(LOG_CRIT, __VA_ARGS__)
 #define SdLogAlert(...)   SdLog(LOG_ALERT, __VA_ARGS__)
 #define SdLogEmerg(...)   SdLog(LOG_EMERG, __VA_ARGS__)
-
-#endif  // UTILS_SD_JOURNAL_LOGGER_HPP_

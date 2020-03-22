@@ -1,5 +1,4 @@
-#ifndef NETWORK_WAKE_ON_LAN_H_
-#define NETWORK_WAKE_ON_LAN_H_
+#pragma once
 
 #include <string>
 
@@ -14,5 +13,3 @@ class WakeOnLan {
   /// Input an Ethernet address and convert to binary.
   static bool ConvertMacStringToBinary(const std::string& mac_string, unsigned char* mac_binary);
 };
-
-#endif  // NETWORK_WAKE_ON_LAN_H_

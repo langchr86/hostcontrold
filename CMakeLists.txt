@@ -1,5 +1,9 @@
 cmake_minimum_required (VERSION 3.5)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
+include(cpplint)
+
 # project settings
 PROJECT(hostcontrold)
 set(HC_APP "hostcontrold")
@@ -28,6 +32,9 @@ add_executable(${HC_APP}
   ${SRC_CHECKED}
   ${SRC_MAIN}
 )
+
+# code checks
+setup_cpplint(${HC_APP} ${SRC_MAIN} ${SRC_CHECKED})
 
 # include directories
 target_include_directories(${HC_APP} PRIVATE

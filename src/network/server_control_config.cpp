@@ -1,33 +1,33 @@
 #include "server_control_config.h"
 
-void to_json(nlohmann::json& j, const ServerControlConfig::Machine& p) {
-  j = nlohmann::json{{"name", p.name}, {"ip", p.ip}};
+void to_json(nlohmann::json& json, const ServerControlConfig::Machine& config) {    // NOLINT[runtime/references]
+  json = nlohmann::json{{"name", config.name}, {"ip", config.ip}};
 }
 
-void from_json(const nlohmann::json& j, ServerControlConfig::Machine& p) {
-  p.name = j.at("name").get<std::string>();
-  p.ip = j.at("ip").get<std::string>();
+void from_json(const nlohmann::json& json, ServerControlConfig::Machine& config) {  // NOLINT[runtime/references]
+  config.name = json.at("name").get<std::string>();
+  config.ip = json.at("ip").get<std::string>();
 }
 
-void to_json(nlohmann::json& j, const ServerControlConfig& p) {
-  j = nlohmann::json{{"name", p.name},
-                     {"ip", p.ip},
-                     {"mac", p.mac},
-                     {"ssh_user", p.ssh_user},
-                     {"control_dir", p.control_dir},
-                     {"control_interval_sec", p.control_interval.count()},
-                     {"shutdown_timeout_sec", p.shutdown_timeout.count()},
-                     {"clients", p.clients}
+void to_json(nlohmann::json& json, const ServerControlConfig& config) {             // NOLINT[runtime/references]
+  json = nlohmann::json{{"name", config.name},
+                        {"ip", config.ip},
+                        {"mac", config.mac},
+                        {"ssh_user", config.ssh_user},
+                        {"control_dir", config.control_dir},
+                        {"control_interval_sec", config.control_interval.count()},
+                        {"shutdown_timeout_sec", config.shutdown_timeout.count()},
+                        {"clients", config.clients}
   };
 }
 
-void from_json(const nlohmann::json& j, ServerControlConfig& p) {
-  p.name = j.at("name").get<std::string>();
-  p.ip = j.at("ip").get<std::string>();
-  p.mac = j.at("mac").get<std::string>();
-  p.ssh_user = j.at("ssh_user").get<std::string>();
-  p.control_dir = j.at("control_dir").get<std::string>() + "/";
-  p.control_interval = std::chrono::seconds{j.at("control_interval_sec").get<std::chrono::seconds::rep>()};
-  p.shutdown_timeout = std::chrono::seconds{j.at("shutdown_timeout_sec").get<std::chrono::seconds::rep>()};
-  p.clients = j.at("clients").get<std::vector<ServerControlConfig::Machine>>();
+void from_json(const nlohmann::json& json, ServerControlConfig& config) {           // NOLINT[runtime/references]
+  config.name = json.at("name").get<std::string>();
+  config.ip = json.at("ip").get<std::string>();
+  config.mac = json.at("mac").get<std::string>();
+  config.ssh_user = json.at("ssh_user").get<std::string>();
+  config.control_dir = json.at("control_dir").get<std::string>() + "/";
+  config.control_interval = std::chrono::seconds{json.at("control_interval_sec").get<std::chrono::seconds::rep>()};
+  config.shutdown_timeout = std::chrono::seconds{json.at("shutdown_timeout_sec").get<std::chrono::seconds::rep>()};
+  config.clients = json.at("clients").get<std::vector<ServerControlConfig::Machine>>();
 }

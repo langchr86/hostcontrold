@@ -1,5 +1,4 @@
-#ifndef SRC_SERVER_CONTROL_H_
-#define SRC_SERVER_CONTROL_H_
+#pragma once
 
 #include <cstdint>
 
@@ -74,5 +73,3 @@ class ServerControl {
   bool CheckFile(const std::string& filepath) const;
   bool CreateFile(const std::string& filepath) const;
 };
-
-#endif /* SRC_SERVER_CONTROL_H_ */

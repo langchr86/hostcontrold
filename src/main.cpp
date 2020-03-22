@@ -9,7 +9,7 @@
 #include "network/server_control_config.h"
 
 using json = nlohmann::json;
-using namespace std::chrono_literals;
+using namespace std::chrono_literals;   // NOLINT[build/namespaces]
 
 static constexpr char config_path[] = "/etc/hostcontrold.conf";
 
