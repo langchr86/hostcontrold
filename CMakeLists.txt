@@ -4,8 +4,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 include(cpplint)
 
-add_subdirectory(libs/liboping)
-
 # project settings
 PROJECT(hostcontrold)
 set(HC_APP "hostcontrold")
@@ -13,6 +11,7 @@ set(HC_APP "hostcontrold")
 # find external dependencies
 find_package(PkgConfig REQUIRED)
 pkg_search_module(SYSTEMD REQUIRED libsystemd)
+pkg_search_module(liboping REQUIRED IMPORTED_TARGET liboping)
 
 # collect sources
 file(GLOB SRC_MAIN "src/main.cpp")
@@ -30,7 +29,6 @@ setup_cpplint(${HC_APP} ${SRC_MAIN} ${SRC_CHECKED})
 
 # include directories
 target_include_directories(${HC_APP} PRIVATE
-  "libs/liboping/src"
   "libs/json/src"
   ${SYSTEMD_INCLUDE_DIRS}
   "src"
@@ -42,9 +40,8 @@ set_target_properties(${HC_APP} PROPERTIES COMPILE_FLAGS "${HC_CFLAGS}")
 set_target_properties(${HC_APP} PROPERTIES CXX_STANDARD 14)
 
 # link to dependencies
-add_dependencies(${HC_APP} liboping)
 target_link_libraries(${HC_APP}
-  "${CMAKE_CURRENT_SOURCE_DIR}/libs/liboping/lib/liboping.a"
+  PkgConfig::liboping
   ${SYSTEMD_LIBRARIES}
 )
 

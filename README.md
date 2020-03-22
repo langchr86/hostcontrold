@@ -46,7 +46,7 @@ Quick start guide
 * Install build dependencies with:
 
   ~~~
-  sudo apt install cmake gcc g++ autoconf pkg-config libtool libsystemd-dev
+  sudo apt install cmake gcc g++ autoconf pkg-config libtool libsystemd-dev liboping-dev
   ~~~
 
 * Build and install:
