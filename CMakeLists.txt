@@ -4,19 +4,11 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 include(cpplint)
 
+add_subdirectory(libs/liboping)
+
 # project settings
 PROJECT(hostcontrold)
 set(HC_APP "hostcontrold")
-
-# dependencies
-include(ExternalProject)
-ExternalProject_Add(liboping
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/liboping
-  CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/libs/liboping/autogen.sh && ${CMAKE_CURRENT_SOURCE_DIR}/libs/liboping/configure --prefix=${CMAKE_CURRENT_SOURCE_DIR}/libs/liboping --without-perl-bindings
-  PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/libs/liboping
-  BUILD_COMMAND ${MAKE}
-  BUILD_IN_SOURCE 1
-)
 
 # find external dependencies
 find_package(PkgConfig REQUIRED)
