@@ -10,7 +10,7 @@ set(HC_APP "hostcontrold")
 
 # find external dependencies
 find_package(PkgConfig REQUIRED)
-pkg_search_module(SYSTEMD REQUIRED libsystemd)
+pkg_search_module(libsystemd REQUIRED IMPORTED_TARGET libsystemd)
 pkg_search_module(liboping REQUIRED IMPORTED_TARGET liboping)
 
 # collect sources
@@ -30,7 +30,6 @@ setup_cpplint(${HC_APP} ${SRC_MAIN} ${SRC_CHECKED})
 # include directories
 target_include_directories(${HC_APP} PRIVATE
   "libs/json/src"
-  ${SYSTEMD_INCLUDE_DIRS}
   "src"
 )
 
@@ -41,8 +40,8 @@ set_target_properties(${HC_APP} PROPERTIES CXX_STANDARD 14)
 
 # link to dependencies
 target_link_libraries(${HC_APP}
+  PkgConfig::libsystemd
   PkgConfig::liboping
-  ${SYSTEMD_LIBRARIES}
 )
 
 # install steps
