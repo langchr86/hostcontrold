@@ -1,7 +1,7 @@
 #include <thread>
 #include <fstream>
 
-#include "json.hpp"
+#include <json.hpp>
 
 #include "utils/sd_journal_logger.hpp"
 #include "utils/sd_journal_logger_core.h"
