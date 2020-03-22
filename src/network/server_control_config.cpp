@@ -1,7 +1,7 @@
 #include "server_control_config.h"
 
 void to_json(nlohmann::json& j, const ServerControlConfig::Machine& p) {
-  j = nlohmann::json{ {"name", p.name}, {"ip", p.ip} };
+  j = nlohmann::json{{"name", p.name}, {"ip", p.ip}};
 }
 
 void from_json(const nlohmann::json& j, ServerControlConfig::Machine& p) {

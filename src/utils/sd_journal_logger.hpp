@@ -43,7 +43,7 @@ class SdJournalLogger : private SdJournalLoggerCore {
 
  public:
   using StringArray = std::array<std::string, sizeof...(Context)>;
-  using ContextTuple = std::tuple<const Context*...>;
+  using ContextTuple = std::tuple<const Context* ...>;
 
   /**
    * \brief Initialize a logger with context information.
@@ -59,12 +59,11 @@ class SdJournalLogger : private SdJournalLoggerCore {
   SdJournalLogger(const std::string& file_name,
                   const std::string& class_name,
                   const StringArray& context_formatters,
-                  const Context*... context_pointers)
+                  const Context* ... context_pointers)
       : file_name_(file_name)
       , class_name_(class_name)
       , context_formatters_(context_formatters)
-      , context_pointers_(context_pointers...)
-  {
+      , context_pointers_(context_pointers...) {
     // ensure correct formatters
     const std::regex expression("[A-Z_]*=%.*");
     for (const auto& format : context_formatters) {
@@ -77,7 +76,7 @@ class SdJournalLogger : private SdJournalLoggerCore {
   /// \attention Do not allow to copy logger with pointers to possible old variables.
   SdJournalLogger(const SdJournalLogger&) = delete;
   /// \attention Do not allow to copy logger with pointers to possible old variables.
-  SdJournalLogger& operator= (const SdJournalLogger&) = delete;
+  SdJournalLogger& operator=(const SdJournalLogger&) = delete;
 
   /**
    * \brief Do the logging with the log message formatter string and the arguments.
@@ -86,8 +85,8 @@ class SdJournalLogger : private SdJournalLoggerCore {
    * \param args All arguments that should be represented in the message string.
    */
   template<typename... Args>
-  void SdLogFunc(const char * const function_name, const char * const line_number, int priority,
-                 const char * const log_format, Args&&... args) const {
+  void SdLogFunc(const char* const function_name, const char* const line_number, int priority,
+                 const char* const log_format, Args&& ... args) const {
     if (priority > max_priority_) {
       return;
     }
@@ -114,17 +113,17 @@ class SdJournalLogger : private SdJournalLoggerCore {
    */
   template<typename... Args, int... Is>
   void InternLog(seq<Is...>,
-                 const char * const function_name,
-                 const char * const line_number,
+                 const char* const function_name,
+                 const char* const line_number,
                  int priority,
-                 const char * const log_format,
-                 Args&&... args) const {
+                 const char* const log_format,
+                 Args&& ... args) const {
     // prepare static context strings
     const auto file_string = std::string("CODE_FILE=") + file_name_;
     const auto line_string = std::string("CODE_LINE=") + line_number;
 
     // format each individual dynamic context string and store it in an array
-    StringArray dynamic_context_strings {
+    StringArray dynamic_context_strings{
         FormatMetaString(context_formatters_[Is].c_str(), std::get<Is>(context_pointers_))...
     };
 
@@ -178,7 +177,7 @@ class SdJournalLogger : private SdJournalLoggerCore {
   }
 
   /// \brief Convert log priority to string.
-  static const char * GetLogLevelText(int priority) {
+  static const char* GetLogLevelText(int priority) {
     switch (priority) {
       case LOG_EMERG:
         return "EMER";

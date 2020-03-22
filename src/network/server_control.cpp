@@ -14,8 +14,7 @@ const char ServerControl::kFileKeepOff[] = "force_off";
 
 ServerControl::ServerControl(const ServerControlConfig& config)
     : config_(config)
-    , logger_(__FILE__, "ServerControl", {"HOST=%s"}, &config_.name)
-{
+    , logger_(__FILE__, "ServerControl", {"HOST=%s"}, &config_.name) {
   logger_.SdLogInfo("Start controlling host: %s", config_.name.c_str());
 
   // create directory
@@ -39,8 +38,7 @@ ServerControl::ServerControl(const ServerControlConfig& config)
 ServerControl::ServerControl(ServerControl&& other)
     : config_(other.config_)
     , logger_(__FILE__, "ServerControl", {"HOST=%s"}, &config_.name)
-    , running_(other.running_)
-{}
+    , running_(other.running_) {}
 
 void ServerControl::DoWork() {
   // do work only in defined interval

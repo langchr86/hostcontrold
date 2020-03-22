@@ -13,7 +13,9 @@ class ServerControlConfig {
     std::string name;
     std::string ip;
     Machine() = default;
-    Machine(const std::string& name, const std::string& ip) : name(name), ip(ip) {}
+    Machine(const std::string& name, const std::string& ip)
+        : name(name)
+        , ip(ip) {}
   };
 
   std::string name;
