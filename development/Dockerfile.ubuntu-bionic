@@ -1,0 +1,18 @@
+FROM ubuntu:bionic
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    systemd \
+    libsystemd-dev \
+    cmake \
+    g++ \
+    pkg-config \
+    libtool \
+    liboping-dev \
+  && apt-get clean \
+  && apt-get autoclean \
+  && apt-get autoremove \
+  && rm -rf /var/lib/apt/lists/*
+
+ENTRYPOINT ["/bin/systemd"]

@@ -1,6 +1,8 @@
 hostcontrold
 ============
 
+[![Build Status](https://travis-ci.com/langchr86/hostcontrold.svg?branch=master)](https://travis-ci.com/langchr86/hostcontrold)
+
 Host Control Daemon.
 Daemon which monitors other hosts with ping requests (ICMP)
 and controls some of them with WOL (wake on LAN) packets.
@@ -46,7 +48,7 @@ Quick start guide
 * Install build dependencies with:
 
   ~~~
-  sudo apt install cmake gcc g++ autoconf pkg-config libtool libsystemd-dev liboping-dev
+  sudo apt install cmake g++ pkg-config libtool libsystemd-dev liboping-dev
   ~~~
 
 * Build and install:
@@ -149,6 +151,41 @@ See the `Installation` steps in the `Quick start guide` section for information 
 
 The code itself is organized as pure CMake project with C++14 code.
 The prefered IDE to work on the code is CLion.
+
+
+### Docker
+
+The whole development steps can also be done in the prepared docker container.
+Those are mainly used to build and test the code with travis on different distributions/toolchains
+but can also be used for local development.
+Ubuntu with GCC is used by default.
+
+~~~ {.bash}
+# Build the docker image.
+./development/1_create.sh
+
+# Create docker container and run it with the correct mounted volumes.
+./development/2_run.sh
+
+# Connect into the container.
+./development/3_connect.sh
+
+# Now you are logged-in the docker container.
+
+cd /tmp/hostcontrold/
+
+# Now you are in the source directory where you can compile and run tests e.g.
+mkdir build
+cd build
+cmake ..
+make -j4
+
+# Leave the container with the following command when you are finished developing/testing.
+exit
+
+# Remove all signs of the docker container.
+./development/5_remove.sh
+~~~
 
 
 ### Future features
