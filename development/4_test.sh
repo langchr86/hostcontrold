@@ -1,24 +1,26 @@
-#! /bin/sh -e
+#! /bin/bash -e
 
 echo "build"
-mkdir -p /tmp/build
-cd /tmp/build
-cmake /tmp/hostcontrold
-make -j4
+mkdir -p /home/build
+cd /home/build
+cmake /home/hostcontrold
+cmake --build /home/build --parallel 4
 
 # TODO(clang)
 # echo "unit tests"
 # make test
 
 echo "installation"
-make install
+cmake --build /home/build -- install
 systemctl daemon-reload
 
 echo "first start fails but creates example config"
 systemctl start hostcontrold | true
+sleep 1
 systemctl is-failed --quiet hostcontrold
 ls /etc/hostcontrold.conf
 
 echo "second start succeeds"
 systemctl start hostcontrold
+sleep 1
 systemctl is-active --quiet hostcontrold

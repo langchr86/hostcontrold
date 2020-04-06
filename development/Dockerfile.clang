@@ -1,0 +1,35 @@
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    systemd \
+    libsystemd-dev \
+    pkg-config \
+    liboping-dev \
+    make \
+    cmake \
+  && apt-get clean \
+  && apt-get autoclean \
+  && apt-get autoremove \
+  && rm -rf /var/lib/apt/lists/*
+
+ARG version=10
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    clang-${version} \
+  && apt-get clean \
+  && apt-get autoclean \
+  && apt-get autoremove \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-${version} 50
+RUN update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-${version} 50
+
+ENV CC=/usr/bin/clang
+ENV CXX=/usr/bin/clang++
+
+ENTRYPOINT ["/bin/systemd"]
