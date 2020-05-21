@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required(VERSION 3.10)
 
 project(hostcontrold)
 
@@ -16,5 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 14)
 
 include_directories(SYSTEM libs/json/src)
+
+enable_testing()
 
 add_subdirectory(hostcontrold)

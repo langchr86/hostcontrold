@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.10)
+
 include(cpplint)
 
 project(hostcontrold)
@@ -40,3 +42,9 @@ install(TARGETS ${PROJECT_NAME}
 install(FILES hostcontrold.service
     DESTINATION /etc/systemd/system/
 )
+
+# include tests only if googletest is installed
+pkg_search_module(gtest QUIET IMPORTED_TARGET gtest)
+if(gtest_FOUND)
+  add_subdirectory(unittest)
+endif()

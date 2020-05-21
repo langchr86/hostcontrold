@@ -6,9 +6,8 @@ cd /home/build
 cmake /home/hostcontrold
 cmake --build /home/build --parallel 4
 
-# TODO(clang)
-# echo "unit tests"
-# make test
+echo "unit tests"
+cmake --build /home/build -- test
 
 echo "installation"
 cmake --build /home/build -- install

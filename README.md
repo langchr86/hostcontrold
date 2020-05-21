@@ -198,6 +198,10 @@ To install directly on host the provided script can be used.
 sudo development/install_gtest.sh
 ~~~
 
+The unit test binary is created by the cmake target `hostcontrold_test`.
+To run the test either directly execute the binary `hostcontrold/unittest/hostcontrold_test`
+or build the cmake target `test` which uses the `ctest` framework.
+
 
 
 ### Future features
