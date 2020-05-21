@@ -11,6 +11,7 @@ RUN apt-get update \
     liboping-dev \
     make \
     cmake \
+    git \
   && apt-get clean \
   && apt-get autoclean \
   && apt-get autoremove \
@@ -31,5 +32,9 @@ RUN update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-${ve
 
 ENV CC=/usr/bin/clang
 ENV CXX=/usr/bin/clang++
+
+# install googletest
+COPY install_gtest.sh /tmp/
+RUN /tmp/install_gtest.sh
 
 ENTRYPOINT ["/bin/systemd"]

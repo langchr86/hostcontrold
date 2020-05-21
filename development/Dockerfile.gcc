@@ -11,6 +11,7 @@ RUN apt-get update \
     liboping-dev \
     make \
     cmake \
+    git \
   && apt-get clean \
   && apt-get autoclean \
   && apt-get autoremove \
@@ -32,5 +33,9 @@ RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${version} 50
 
 ENV CC=/usr/bin/gcc
 ENV CXX=/usr/bin/g++
+
+# install googletest
+COPY install_gtest.sh /tmp/
+RUN /tmp/install_gtest.sh
 
 ENTRYPOINT ["/bin/systemd"]

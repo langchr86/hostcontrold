@@ -188,6 +188,18 @@ exit
 ~~~
 
 
+### Unit testing
+
+For unit tests the [`googletest`](https://github.com/google/googletest) framework is used.
+This is automatically installed in the docker containers.
+To install directly on host the provided script can be used.
+
+~~~
+sudo development/install_gtest.sh
+~~~
+
+
+
 ### Future features
 
 * Extend the shutdown timeout by file in control-directory.
