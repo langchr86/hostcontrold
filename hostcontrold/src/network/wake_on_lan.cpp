@@ -102,11 +102,11 @@ bool WakeOnLan::ConvertMacStringToBinary(const std::string& mac_string, unsigned
     val = 0;
     c = *read_iterator++;
     if (isdigit(c)) {
-      val = c - '0';
+      val = static_cast<unsigned int>(c - '0');
     } else if (c >= 'a' && c <= 'f') {
-      val = c - 'a' + 10;
+      val = static_cast<unsigned int>(c - 'a' + 10);
     } else if (c >= 'A' && c <= 'F') {
-      val = c - 'A' + 10;
+      val = static_cast<unsigned int>(c - 'A' + 10);
     } else {
       GetLogger().SdLogErr("Invalid ether address: %s", mac_string.c_str());
       return false;
@@ -116,11 +116,11 @@ bool WakeOnLan::ConvertMacStringToBinary(const std::string& mac_string, unsigned
     c = *read_iterator;
 
     if (isdigit(c)) {
-      val |= c - '0';
+      val |= static_cast<unsigned int>(c - '0');
     } else if (c >= 'a' && c <= 'f') {
-      val |= c - 'a' + 10;
+      val |= static_cast<unsigned int>(c - 'a' + 10);
     } else if (c >= 'A' && c <= 'F') {
-      val |= c - 'A' + 10;
+      val |= static_cast<unsigned int>(c - 'A' + 10);
     } else if (c == ':' || c == 0) {
       val >>= 4;
     } else {
