@@ -29,6 +29,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_lib)
 setup_cpplint(${PROJECT_NAME}_lib ${src_lib} ${hdr_lib})
 setup_cpplint(${PROJECT_NAME} ${src_main})
 
+# set compiler flags
+target_compile_options(${PROJECT_NAME}_lib PRIVATE ${cxxflags})
+target_compile_options(${PROJECT_NAME} PRIVATE ${cxxflags})
+
 # install steps
 install(TARGETS ${PROJECT_NAME}
     RUNTIME DESTINATION /usr/sbin/
