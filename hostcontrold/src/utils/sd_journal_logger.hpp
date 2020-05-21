@@ -4,6 +4,8 @@
 
 #include <sys/syslog.h>
 
+#include <cstddef>
+
 #include <string>
 #include <tuple>
 #include <utility>
@@ -28,15 +30,15 @@
 template<typename... Context>
 class SdJournalLogger : private SdJournalLoggerCore {
   // some helpers for tuple unpacking
-  template<int...>
+  template<size_t...>
   struct seq {
   };
 
-  template<int N, int... Is>
+  template<size_t N, size_t... Is>
   struct gen_seq : gen_seq<N - 1, N - 1, Is...> {
   };
 
-  template<int... Is>
+  template<size_t... Is>
   struct gen_seq<0, Is...> : seq<Is...> {
   };
 
@@ -110,7 +112,7 @@ class SdJournalLogger : private SdJournalLoggerCore {
    * EvaluateValue function is chosen to the matching type and reads the real value to print. In the usual case this
    * works by dereferencing the pointer.
    */
-  template<typename... Args, int... Is>
+  template<typename... Args, size_t... Is>
   void InternLog(seq<Is...>,
                  const char* const function_name,
                  const char* const line_number,
