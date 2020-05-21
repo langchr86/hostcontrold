@@ -196,7 +196,6 @@ exit
 * Maybe allow to configure whole shutdown command. This would allow to use non-linux servers.
   And some special shutdown handling could be executed.
 * Introduce interfaces and write unit tests for control logic.
-* Use C++17 and `std::filesystem`.
 
 
 
