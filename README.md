@@ -15,12 +15,12 @@ Features
 Main purpose is to control one/multiple linux hosts (e.g. SMB server) by some central linux host.
 This is to save power by shutting down not needed servers automatically.
 
-The central host where hostcontrold is running does monitor not only the to control host (server)
+The central host where `hostcontrold` is running does monitor not only the to control host (server)
 but also the clients of this server.
 If one of the configured client hosts is detected by a ping
 the central controller starts the server host by using a magic WOL packet.
 This allows to only run servers if some clients are up and running.
-If all clients shutdown the server will do so too after some timeout period.
+If all clients shutdown the server will shutdown too after a specified timeout period.
 
 All the features:
 
