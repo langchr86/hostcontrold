@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
     logger.SdLogErr("Found no config file under: %s", config_path);
 
     ServerControlConfig example_config =
-        {"lang-nas16", "192.168.0.6", "40:8D:5C:B6:E6:52", "clang", "/share/lang-nas16/", 5s, 10min};
+        {"lang-nas16", "192.168.0.6", "40:8D:5C:B6:E6:52", "clang", "/share/lang-nas16/", 5s, 10min, {} };
     example_config.clients.emplace_back("lang-xps13", "192.168.0.213");
     example_config.clients.emplace_back("lang-ct2014", "192.168.0.25");
     config.push_back(example_config);
