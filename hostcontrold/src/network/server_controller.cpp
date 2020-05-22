@@ -1,4 +1,4 @@
-#include "server_control.h"
+#include "server_controller.h"
 
 #include <sys/stat.h>
 #include <fstream>
@@ -7,12 +7,12 @@
 
 #include "network/wake_on_lan.h"
 
-const char ServerControl::kFileOn[] = "on";
-const char ServerControl::kFileOff[] = "off";
-const char ServerControl::kFileKeepOn[] = "force_on";
-const char ServerControl::kFileKeepOff[] = "force_off";
+const char ServerController::kFileOn[] = "on";
+const char ServerController::kFileOff[] = "off";
+const char ServerController::kFileKeepOn[] = "force_on";
+const char ServerController::kFileKeepOff[] = "force_off";
 
-ServerControl::ServerControl(const ServerMachineConfig& config)
+ServerController::ServerController(const ServerMachineConfig& config)
     : config_(config)
     , logger_(__FILE__, "ServerControl", {"HOST=%s"}, &config_.name) {
   logger_.SdLogInfo("Start controlling host: %s", config_.name.c_str());
@@ -35,12 +35,12 @@ ServerControl::ServerControl(const ServerMachineConfig& config)
   last_client_ = std::chrono::system_clock::now();
 }
 
-ServerControl::ServerControl(ServerControl&& other)
+ServerController::ServerController(ServerController&& other)
     : config_(other.config_)
     , logger_(__FILE__, "ServerControl", {"HOST=%s"}, &config_.name)
     , running_(other.running_) {}
 
-void ServerControl::DoWork() {
+void ServerController::DoWork() {
   // do work only in defined interval
   const auto current_time = std::chrono::system_clock::now();
   if (last_control_ + config_.control_interval > current_time) {
@@ -80,7 +80,7 @@ void ServerControl::DoWork() {
   }
 }
 
-void ServerControl::StartServerIfNotRunning() {
+void ServerController::StartServerIfNotRunning() {
   // only if server not running
   if (running_) {
     return;
@@ -94,14 +94,14 @@ void ServerControl::StartServerIfNotRunning() {
   logger_.SdLogDebug("WOL sent");
 }
 
-void ServerControl::ShutdownServerIfRunning() {
+void ServerController::ShutdownServerIfRunning() {
   if (running_ == false) {
     return;
   }
   ShutdownWithSsh();
 }
 
-void ServerControl::ShutdownWithSsh() {
+void ServerController::ShutdownWithSsh() {
   // do use SSH if available
   // This needs a correct hash in ~/.ssh/known_hosts. This can be ensured by
   // once manually connect via ssh as root to the remote host. In addition the root user needs a not
@@ -121,7 +121,7 @@ void ServerControl::ShutdownWithSsh() {
   logger_.SdLogDebug("shutdown command via SSH executed");
 }
 
-void ServerControl::PingServer() {
+void ServerController::PingServer() {
   // check if server is running
   const int pingRes = Ping(config_.ip);
 
@@ -141,7 +141,7 @@ void ServerControl::PingServer() {
   }
 }
 
-bool ServerControl::CheckClients() {
+bool ServerController::CheckClients() {
   // check if any client is runnning
   for (auto it = config_.clients.cbegin(); it != config_.clients.cend(); ++it) {
     const int pingRes = Ping(it->ip);
@@ -165,7 +165,7 @@ bool ServerControl::CheckClients() {
   return false;
 }
 
-void ServerControl::CheckAndSignalServerState(const bool& newState) {
+void ServerController::CheckAndSignalServerState(const bool& newState) {
   if (newState) {
     // server changed state to running
     if (running_ == false) {
@@ -189,7 +189,7 @@ void ServerControl::CheckAndSignalServerState(const bool& newState) {
   }
 }
 
-int ServerControl::Ping(const std::string& ip) const {
+int ServerController::Ping(const std::string& ip) const {
   // create object
   pingobj_t* obj = ping_construct();
 
@@ -229,12 +229,12 @@ int ServerControl::Ping(const std::string& ip) const {
   }
 }
 
-bool ServerControl::CheckFile(const std::string& filepath) const {
+bool ServerController::CheckFile(const std::string& filepath) const {
   std::ifstream file(filepath);
   return static_cast<bool>(file);
 }
 
-bool ServerControl::CreateFile(const std::string& filepath) const {
+bool ServerController::CreateFile(const std::string& filepath) const {
   std::ifstream file(filepath);
   bool check = !file;
   if (check) {

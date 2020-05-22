@@ -6,7 +6,7 @@
 #include "utils/ignore.hpp"
 #include "utils/sd_journal_logger.hpp"
 #include "utils/sd_journal_logger_core.h"
-#include "network/server_control.h"
+#include "network/server_controller.h"
 #include "config/server_machine_config.h"
 
 using json = nlohmann::json;
@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
 
   // read config file
   json config;
-  std::vector<ServerControl> controllers;
+  std::vector<ServerController> controllers;
   std::ifstream config_stream(config_path);
 
   // create example config if no file exists

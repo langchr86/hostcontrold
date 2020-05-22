@@ -10,15 +10,15 @@
 
 #include "config/server_machine_config.h"
 
-class ServerControl {
+class ServerController {
   static const char kFileOn[];
   static const char kFileOff[];
   static const char kFileKeepOn[];
   static const char kFileKeepOff[];
 
  public:
-  explicit ServerControl(const ServerMachineConfig& config);
-  explicit ServerControl(ServerControl&& other);
+  explicit ServerController(const ServerMachineConfig& config);
+  explicit ServerController(ServerController&& other);
 
   /**
    * \brief The main work method for each instance. The method returns after each iteration.
