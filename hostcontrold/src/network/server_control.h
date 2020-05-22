@@ -8,7 +8,7 @@
 
 #include <utils/sd_journal_logger.hpp>
 
-#include "config/server_control_config.h"
+#include "config/server_machine_config.h"
 
 class ServerControl {
   static const char kFileOn[];
@@ -17,7 +17,7 @@ class ServerControl {
   static const char kFileKeepOff[];
 
  public:
-  explicit ServerControl(const ServerControlConfig& config);
+  explicit ServerControl(const ServerMachineConfig& config);
   explicit ServerControl(ServerControl&& other);
 
   /**
@@ -26,7 +26,7 @@ class ServerControl {
   void DoWork();
 
  private:
-  const ServerControlConfig config_;
+  const ServerMachineConfig config_;
   SdJournalLogger<std::string> logger_;
   bool running_;
 

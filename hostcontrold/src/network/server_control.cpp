@@ -12,7 +12,7 @@ const char ServerControl::kFileOff[] = "off";
 const char ServerControl::kFileKeepOn[] = "force_on";
 const char ServerControl::kFileKeepOff[] = "force_off";
 
-ServerControl::ServerControl(const ServerControlConfig& config)
+ServerControl::ServerControl(const ServerMachineConfig& config)
     : config_(config)
     , logger_(__FILE__, "ServerControl", {"HOST=%s"}, &config_.name) {
   logger_.SdLogInfo("Start controlling host: %s", config_.name.c_str());

@@ -1,6 +1,6 @@
-#include "server_control_config.h"
+#include "server_machine_config.h"
 
-void to_json(nlohmann::json& json, const ServerControlConfig& config) {             // NOLINT[runtime/references]
+void to_json(nlohmann::json& json, const ServerMachineConfig& config) {             // NOLINT[runtime/references]
   json = nlohmann::json{{"name", config.name},
                         {"ip", config.ip},
                         {"mac", config.mac},
@@ -12,7 +12,7 @@ void to_json(nlohmann::json& json, const ServerControlConfig& config) {         
   };
 }
 
-void from_json(const nlohmann::json& json, ServerControlConfig& config) {           // NOLINT[runtime/references]
+void from_json(const nlohmann::json& json, ServerMachineConfig& config) {           // NOLINT[runtime/references]
   config.name = json.at("name").get<std::string>();
   config.ip = json.at("ip").get<std::string>();
   config.mac = json.at("mac").get<std::string>();

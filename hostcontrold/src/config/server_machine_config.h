@@ -8,7 +8,7 @@
 
 #include "config/client_machine_config.h"
 
-class ServerControlConfig {
+class ServerMachineConfig {
  public:
   std::string name;
   std::string ip;
@@ -21,5 +21,5 @@ class ServerControlConfig {
 };
 
 // conversion functions used by JSON library
-void to_json(nlohmann::json& json, const ServerControlConfig& config);              // NOLINT[runtime/references]
-void from_json(const nlohmann::json& json, ServerControlConfig& config);            // NOLINT[runtime/references]
+void to_json(nlohmann::json& json, const ServerMachineConfig& config);              // NOLINT[runtime/references]
+void from_json(const nlohmann::json& json, ServerMachineConfig& config);            // NOLINT[runtime/references]
