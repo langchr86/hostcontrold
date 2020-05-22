@@ -5,15 +5,14 @@
 
 #include <oping.h>
 
-#include "network/wake_on_lan.h"
-
 const char ServerController::kFileOn[] = "on";
 const char ServerController::kFileOff[] = "off";
 const char ServerController::kFileKeepOn[] = "force_on";
 const char ServerController::kFileKeepOff[] = "force_off";
 
-ServerController::ServerController(const ServerMachineConfig& config)
+ServerController::ServerController(const ServerMachineConfig& config, std::shared_ptr<WolInterface> wol)
     : config_(config)
+    , wol_(wol)
     , logger_(__FILE__, "ServerControl", {"HOST=%s"}, &config_.name) {
   logger_.SdLogInfo("Start controlling host: %s", config_.name.c_str());
 
@@ -37,6 +36,7 @@ ServerController::ServerController(const ServerMachineConfig& config)
 
 ServerController::ServerController(ServerController&& other)
     : config_(other.config_)
+    , wol_(std::move(other.wol_))
     , logger_(__FILE__, "ServerControl", {"HOST=%s"}, &config_.name)
     , running_(other.running_) {}
 
@@ -87,7 +87,7 @@ void ServerController::StartServerIfNotRunning() {
   }
 
   // send WOL packet
-  if (WakeOnLan::SendWol(config_.mac) == false) {
+  if (wol_->SendMagicPacket(config_.mac) == false) {
     logger_.SdLogErr("WOL failed!");
   }
 

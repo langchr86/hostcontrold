@@ -9,6 +9,7 @@
 #include <utils/sd_journal_logger.hpp>
 
 #include "config/server_machine_config.h"
+#include "network/wol_interface.h"
 
 class ServerController {
   static const char kFileOn[];
@@ -17,7 +18,7 @@ class ServerController {
   static const char kFileKeepOff[];
 
  public:
-  explicit ServerController(const ServerMachineConfig& config);
+  ServerController(const ServerMachineConfig& config, std::shared_ptr<WolInterface> wol);
   explicit ServerController(ServerController&& other);
 
   /**
@@ -27,6 +28,8 @@ class ServerController {
 
  private:
   const ServerMachineConfig config_;
+  std::shared_ptr<WolInterface> wol_;
+
   SdJournalLogger<std::string> logger_;
   bool running_;
 

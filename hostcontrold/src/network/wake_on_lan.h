@@ -1,15 +1,14 @@
 #pragma once
 
-#include <string>
+#include "wol_interface.h"
 
-/**
- * \brief Base class that contains some core functionality that is central to SdJournalLogger.
- */
-class WakeOnLan {
+class WakeOnLan : public WolInterface {
  public:
-  static bool SendWol(const std::string& mac);
+  bool SendMagicPacket(const std::string& mac_address) const override;
 
  private:
+  static bool SendWol(const std::string& mac);
+
   /// Input an Ethernet address and convert to binary.
   static bool ConvertMacStringToBinary(const std::string& mac_string, unsigned char* mac_binary);
 };

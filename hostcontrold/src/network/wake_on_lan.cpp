@@ -39,6 +39,10 @@ static const SdJournalLogger<>& GetLogger() {
   return logger;
 }
 
+bool WakeOnLan::SendMagicPacket(const std::string& mac_address) const {
+  return SendWol(mac_address);
+}
+
 bool WakeOnLan::SendWol(const std::string& mac) {
   int i, j;
   int packet;

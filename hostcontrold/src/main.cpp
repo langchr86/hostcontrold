@@ -1,13 +1,15 @@
-#include <thread>
 #include <fstream>
+#include <memory>
+#include <thread>
 
 #include <json.hpp>
 
+#include "config/server_machine_config.h"
+#include "network/server_controller.h"
+#include "network/wake_on_lan.h"
 #include "utils/ignore.hpp"
 #include "utils/sd_journal_logger.hpp"
 #include "utils/sd_journal_logger_core.h"
-#include "network/server_controller.h"
-#include "config/server_machine_config.h"
 
 using json = nlohmann::json;
 using namespace std::chrono_literals;   // NOLINT[build/namespaces]
@@ -52,9 +54,10 @@ int main(int argc, char* argv[]) {
   }
 
   // create configured controllers
+  auto wol = std::make_shared<WakeOnLan>();
   for (const auto& config_object : config) {
     const ServerMachineConfig control_config(config_object);
-    controllers.emplace_back(control_config);
+    controllers.emplace_back(control_config, wol);
   }
 
   // main loop
