@@ -7,7 +7,7 @@
 #include "utils/sd_journal_logger.hpp"
 #include "utils/sd_journal_logger_core.h"
 #include "network/server_control.h"
-#include "network/server_control_config.h"
+#include "config/server_control_config.h"
 
 using json = nlohmann::json;
 using namespace std::chrono_literals;   // NOLINT[build/namespaces]

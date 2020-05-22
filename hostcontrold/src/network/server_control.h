@@ -8,7 +8,7 @@
 
 #include <utils/sd_journal_logger.hpp>
 
-#include "network/server_control_config.h"
+#include "config/server_control_config.h"
 
 class ServerControl {
   static const char kFileOn[];
