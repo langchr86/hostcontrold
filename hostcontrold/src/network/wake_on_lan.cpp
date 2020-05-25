@@ -25,11 +25,11 @@
 
 #include "wake_on_lan.h"
 
-#include <linux/if_ether.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-
 #include <cstring>
+
+#include <linux/if_ether.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
 #include "utils/sd_journal_logger.hpp"

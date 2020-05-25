@@ -5,8 +5,8 @@
 #include <json.hpp>
 
 #include "config/server_machine_config.h"
+#include "logic/server_controller.h"
 #include "network/pinger.h"
-#include "network/server_controller.h"
 #include "network/ssh_shutdown.h"
 #include "network/wake_on_lan.h"
 #include "utils/ignore.hpp"
