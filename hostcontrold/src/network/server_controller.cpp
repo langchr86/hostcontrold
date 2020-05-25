@@ -3,16 +3,17 @@
 #include <sys/stat.h>
 #include <fstream>
 
-#include <oping.h>
-
 const char ServerController::kFileOn[] = "on";
 const char ServerController::kFileOff[] = "off";
 const char ServerController::kFileKeepOn[] = "force_on";
 const char ServerController::kFileKeepOff[] = "force_off";
 
-ServerController::ServerController(const ServerMachineConfig& config, std::shared_ptr<WolInterface> wol)
+ServerController::ServerController(const ServerMachineConfig& config,
+                                   std::shared_ptr<WolInterface> wol,
+                                   std::shared_ptr<PingInterface> ping)
     : config_(config)
     , wol_(wol)
+    , ping_(ping)
     , logger_(__FILE__, "ServerControl", {"HOST=%s"}, &config_.name) {
   logger_.SdLogInfo("Start controlling host: %s", config_.name.c_str());
 
@@ -37,6 +38,7 @@ ServerController::ServerController(const ServerMachineConfig& config, std::share
 ServerController::ServerController(ServerController&& other)
     : config_(other.config_)
     , wol_(std::move(other.wol_))
+    , ping_(std::move(other.ping_))
     , logger_(__FILE__, "ServerControl", {"HOST=%s"}, &config_.name)
     , running_(other.running_) {}
 
@@ -122,46 +124,39 @@ void ServerController::ShutdownWithSsh() {
 }
 
 void ServerController::PingServer() {
-  // check if server is running
-  const int pingRes = Ping(config_.ip);
-
-  // server running
-  if (pingRes > 0) {
-    logger_.SdLogDebug("server-ping: host is running");
-    CheckAndSignalServerState(true);
-
-    // server not running
-  } else if (pingRes == 0) {
-    logger_.SdLogDebug("server-ping: host does not answer");
-    CheckAndSignalServerState(false);
-
-    // log failed ping
-  } else {
-    logger_.SdLogErr("server-ping failed: %i", pingRes);
+  const auto result = ping_->PingHost(config_.ip);
+  switch (result) {
+    case PingResult::kHostActive:
+      logger_.SdLogDebug("server-ping: host is running");
+      CheckAndSignalServerState(true);
+      break;
+    case PingResult::kHostInactive:
+      logger_.SdLogDebug("server-ping: host does not answer");
+      CheckAndSignalServerState(false);
+      break;
+    default:
+      logger_.SdLogErr("server-ping: failed");
+      break;
   }
 }
 
 bool ServerController::CheckClients() {
-  // check if any client is runnning
-  for (auto it = config_.clients.cbegin(); it != config_.clients.cend(); ++it) {
-    const int pingRes = Ping(it->ip);
-
-    // client answer
-    if (pingRes > 0) {
-      logger_.SdLogDebug("Client(%s) has answered. Skip other pings.", it->name.c_str());
-      return true;
-
-      // no answer
-    } else if (pingRes == 0) {
-      logger_.SdLogDebug("Client(%s) does not answer.", it->name.c_str());
-
-      // ping failed
-    } else {
-      logger_.SdLogErr("client-ping(%s) failed: %i", it->name.c_str(), pingRes);
+  for (const auto& client : config_.clients) {
+    const auto result = ping_->PingHost(client.ip);
+    switch (result) {
+      case PingResult::kHostActive:
+        logger_.SdLogDebug("Client(%s) has answered. Skip other pings.", client.name.c_str());
+        return true;
+      case PingResult::kHostInactive:
+        logger_.SdLogDebug("Client(%s) does not answer.", client.name.c_str());
+        break;
+      default:
+        logger_.SdLogErr("client-ping(%s): failed", client.name.c_str());
+        break;
     }
   }
 
-  // if no clients are running
+  // no clients running
   return false;
 }
 
@@ -186,46 +181,6 @@ void ServerController::CheckAndSignalServerState(const bool& newState) {
       remove((config_.control_dir + kFileOn).c_str());
       running_ = false;
     }
-  }
-}
-
-int ServerController::Ping(const std::string& ip) const {
-  // create object
-  pingobj_t* obj = ping_construct();
-
-  // add host to object
-  if (ping_host_add(obj, ip.c_str()) < 0) {
-    return -1;    // error
-  }
-
-  // send ICMP
-  int res = ping_send(obj);
-  if (res < 0) {
-    return -2;    // error
-  } else if (res == 0) {
-    // no echo replies
-  }
-
-  // receive info
-  pingobj_iter_t* iter = ping_iterator_get(obj);
-  double latency = -1.0;
-  size_t buffer_len = sizeof(latency);
-
-  if (iter == nullptr) {
-    return -4;    // error
-  }
-  if (ping_iterator_get_info(iter, PING_INFO_LATENCY, &latency, &buffer_len) < 0) {
-    return -5;    // error
-  }
-
-  // delete resources
-  ping_destroy(obj);
-
-  // return result
-  if (latency < 0.0) {
-    return 0;    // timeout
-  } else {
-    return 1;    // ping reply received
   }
 }
 

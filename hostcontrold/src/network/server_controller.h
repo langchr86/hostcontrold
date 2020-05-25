@@ -9,6 +9,7 @@
 #include <utils/sd_journal_logger.hpp>
 
 #include "config/server_machine_config.h"
+#include "network/ping_interface.h"
 #include "network/wol_interface.h"
 
 class ServerController {
@@ -18,7 +19,9 @@ class ServerController {
   static const char kFileKeepOff[];
 
  public:
-  ServerController(const ServerMachineConfig& config, std::shared_ptr<WolInterface> wol);
+  ServerController(const ServerMachineConfig& config,
+                   std::shared_ptr<WolInterface> wol,
+                   std::shared_ptr<PingInterface> ping);
   explicit ServerController(ServerController&& other);
 
   /**
@@ -29,6 +32,7 @@ class ServerController {
  private:
   const ServerMachineConfig config_;
   std::shared_ptr<WolInterface> wol_;
+  std::shared_ptr<PingInterface> ping_;
 
   SdJournalLogger<std::string> logger_;
   bool running_;
@@ -54,14 +58,7 @@ class ServerController {
    */
   void ShutdownWithSsh();
 
-  /**
-   * \brief Evaluate server state.
-   */
   void PingServer();
-
-  /**
-   * \brief Try to ping all clients and return true if any client could be reached.
-   */
   bool CheckClients();
 
   /*
@@ -72,7 +69,6 @@ class ServerController {
    */
   void CheckAndSignalServerState(const bool& newState);
 
-  int Ping(const std::string& ip) const;
   bool CheckFile(const std::string& filepath) const;
   bool CreateFile(const std::string& filepath) const;
 };
