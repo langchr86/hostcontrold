@@ -2,15 +2,14 @@
 
 #include <cstdint>
 
-#include <string>
-#include <vector>
 #include <chrono>
-
-#include <utils/sd_journal_logger.hpp>
+#include <memory>
+#include <string>
 
 #include "config/server_machine_config.h"
 #include "network/ping_interface.h"
 #include "network/wol_interface.h"
+#include "utils/sd_journal_logger.hpp"
 
 class ServerController {
   static const char kFileOn[];
