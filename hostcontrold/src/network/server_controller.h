@@ -23,7 +23,9 @@ class ServerController {
                    std::shared_ptr<WolInterface> wol,
                    std::shared_ptr<PingInterface> ping,
                    std::shared_ptr<ShutdownInterface> shutdown);
-  explicit ServerController(ServerController&& other);
+
+  ServerController(const ServerController& other) = delete;
+  ServerController(ServerController&& other) = delete;
 
   void DoWork();
 

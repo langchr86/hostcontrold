@@ -37,14 +37,6 @@ ServerController::ServerController(const ServerMachineConfig& config,
   last_client_ = std::chrono::system_clock::now();
 }
 
-ServerController::ServerController(ServerController&& other)
-    : config_(other.config_)
-    , wol_(std::move(other.wol_))
-    , ping_(std::move(other.ping_))
-    , shutdown_(std::move(other.shutdown_))
-    , logger_(__FILE__, "ServerControl", {"HOST=%s"}, &config_.name)
-    , running_(other.running_) {}
-
 void ServerController::DoWork() {
   // do work only in defined interval
   const auto current_time = std::chrono::system_clock::now();

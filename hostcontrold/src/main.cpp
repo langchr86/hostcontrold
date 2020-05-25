@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
 
   // read config file
   json config;
-  std::vector<ServerController> controllers;
+  std::vector<std::shared_ptr<ServerController>> controllers;
   std::ifstream config_stream(config_path);
 
   // create example config if no file exists
@@ -61,13 +61,13 @@ int main(int argc, char* argv[]) {
   auto ssh_shutdown = std::make_shared<SshShutdown>();
   for (const auto& config_object : config) {
     const ServerMachineConfig control_config(config_object);
-    controllers.emplace_back(control_config, wol, pinger, ssh_shutdown);
+    controllers.emplace_back(std::make_shared<ServerController>(control_config, wol, pinger, ssh_shutdown));
   }
 
   // main loop
   while (true) {
-    for (auto& controller : controllers) {
-      controller.DoWork();
+    for (const auto& controller : controllers) {
+      controller->DoWork();
     }
     std::this_thread::sleep_for(1s);
   }
