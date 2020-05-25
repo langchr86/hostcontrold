@@ -10,10 +10,12 @@ const char ServerController::kFileKeepOff[] = "force_off";
 
 ServerController::ServerController(const ServerMachineConfig& config,
                                    std::shared_ptr<WolInterface> wol,
-                                   std::shared_ptr<PingInterface> ping)
+                                   std::shared_ptr<PingInterface> ping,
+                                   std::shared_ptr<ShutdownInterface> shutdown)
     : config_(config)
     , wol_(wol)
     , ping_(ping)
+    , shutdown_(shutdown)
     , logger_(__FILE__, "ServerControl", {"HOST=%s"}, &config_.name) {
   logger_.SdLogInfo("Start controlling host: %s", config_.name.c_str());
 
@@ -39,6 +41,7 @@ ServerController::ServerController(ServerController&& other)
     : config_(other.config_)
     , wol_(std::move(other.wol_))
     , ping_(std::move(other.ping_))
+    , shutdown_(std::move(other.shutdown_))
     , logger_(__FILE__, "ServerControl", {"HOST=%s"}, &config_.name)
     , running_(other.running_) {}
 
@@ -100,27 +103,7 @@ void ServerController::ShutdownServerIfRunning() {
   if (running_ == false) {
     return;
   }
-  ShutdownWithSsh();
-}
-
-void ServerController::ShutdownWithSsh() {
-  // do use SSH if available
-  // This needs a correct hash in ~/.ssh/known_hosts. This can be ensured by
-  // once manually connect via ssh as root to the remote host. In addition the root user needs a not
-  // passphrase secured rsa-key that allowes him to connect to the remote. Ensure to configure
-  // the correct user of the remote.
-  const auto ssh_login = std::string("ssh ") + config_.ssh_user + "@" + config_.ip;
-  logger_.SdLogDebug("SSH login command: %s", ssh_login.c_str());
-  FILE* ssh = popen(ssh_login.c_str(), "w");
-  if (ssh == nullptr) {
-    logger_.SdLogErr("popen failed!");
-    return;
-  }
-
-  fputs("sudo shutdown -h now", ssh);
-
-  pclose(ssh);
-  logger_.SdLogDebug("shutdown command via SSH executed");
+  shutdown_->SendShutdownCommand(config_.ip, config_.ssh_user);
 }
 
 void ServerController::PingServer() {
