@@ -1,8 +1,5 @@
 #include "server_controller.h"
 
-#include <sys/stat.h>
-#include <fstream>
-
 const char ServerController::kFileOn[] = "on";
 const char ServerController::kFileOff[] = "off";
 const char ServerController::kFileKeepOn[] = "force_on";
@@ -10,26 +7,25 @@ const char ServerController::kFileKeepOff[] = "force_off";
 
 ServerController::ServerController(const ServerMachineConfig& config,
                                    std::shared_ptr<TimeInterface> time,
+                                   std::shared_ptr<FileInterface> file,
                                    std::shared_ptr<WolInterface> wol,
                                    std::shared_ptr<PingInterface> ping,
                                    std::shared_ptr<ShutdownInterface> shutdown)
     : config_(config)
     , time_(time)
+    , file_(file)
     , wol_(wol)
     , ping_(ping)
     , shutdown_(shutdown)
     , logger_(__FILE__, "ServerControl", {"HOST=%s"}, &config_.name) {
   logger_.SdLogInfo("Start controlling host: %s", config_.name.c_str());
 
-  // create directory
-  const int status = mkdir(config_.control_dir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-  if (status != 0) {
-    logger_.SdLogDebug("Folder already exists: %s", config_.control_dir.c_str());
-  }
+  // create control directory
+  file_->CreateDirectory(config_.control_dir);
 
   // remove old files
-  remove((config_.control_dir + kFileOn).c_str());
-  remove((config_.control_dir + kFileOff).c_str());
+  file_->RemoveFile(config_.control_dir + kFileOn);
+  file_->RemoveFile(config_.control_dir + kFileOff);
 
   // force reset server state to off
   running_ = true;
@@ -52,7 +48,7 @@ void ServerController::DoWork() {
 
   // check force_on-file and start server if not already running
   // force_on has higher priority than force_off
-  if (CheckFile(config_.control_dir + kFileKeepOn)) {
+  if (file_->CheckFileExists(config_.control_dir + kFileKeepOn)) {
     logger_.SdLogDebug("force_on file available");
     StartServerIfNotRunning();
     last_client_ = current_time;
@@ -60,7 +56,7 @@ void ServerController::DoWork() {
   }
 
   // check force_off-file and stop server if running
-  if (CheckFile(config_.control_dir + kFileKeepOff)) {
+  if (file_->CheckFileExists(config_.control_dir + kFileKeepOff)) {
     logger_.SdLogDebug("force_off file available");
     ShutdownServerIfRunning();
     return;
@@ -144,8 +140,8 @@ void ServerController::CheckAndSignalServerState(const bool& newState) {
       logger_.SdLogInfo("server started");
 
       // write on-file and delete off-file
-      CreateFile(config_.control_dir + kFileOn);
-      remove((config_.control_dir + kFileOff).c_str());
+      file_->CreateEmptyFile(config_.control_dir + kFileOn);
+      file_->RemoveFile(config_.control_dir + kFileOff);
       running_ = true;
     }
   } else {
@@ -154,24 +150,9 @@ void ServerController::CheckAndSignalServerState(const bool& newState) {
       logger_.SdLogInfo("server stopped");
 
       // write off-file and delete on-file
-      CreateFile(config_.control_dir + kFileOff);
-      remove((config_.control_dir + kFileOn).c_str());
+      file_->CreateEmptyFile(config_.control_dir + kFileOff);
+      file_->RemoveFile(config_.control_dir + kFileOn);
       running_ = false;
     }
   }
-}
-
-bool ServerController::CheckFile(const std::string& filepath) const {
-  std::ifstream file(filepath);
-  return static_cast<bool>(file);
-}
-
-bool ServerController::CreateFile(const std::string& filepath) const {
-  std::ifstream file(filepath);
-  bool check = !file;
-  if (check) {
-    std::ofstream newFile(filepath);
-    newFile.close();
-  }
-  return check;
 }

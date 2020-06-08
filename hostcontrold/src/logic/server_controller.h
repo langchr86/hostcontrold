@@ -10,6 +10,7 @@
 #include "network/ping_interface.h"
 #include "network/shutdown_interface.h"
 #include "network/wol_interface.h"
+#include "utils/file_interface.h"
 #include "utils/sd_journal_logger.hpp"
 #include "utils/time_interface.h"
 
@@ -22,6 +23,7 @@ class ServerController {
  public:
   ServerController(const ServerMachineConfig& config,
                    std::shared_ptr<TimeInterface> time,
+                   std::shared_ptr<FileInterface> file,
                    std::shared_ptr<WolInterface> wol,
                    std::shared_ptr<PingInterface> ping,
                    std::shared_ptr<ShutdownInterface> shutdown);
@@ -34,6 +36,7 @@ class ServerController {
  private:
   const ServerMachineConfig config_;
   std::shared_ptr<TimeInterface> time_;
+  std::shared_ptr<FileInterface> file_;
   std::shared_ptr<WolInterface> wol_;
   std::shared_ptr<PingInterface> ping_;
   std::shared_ptr<ShutdownInterface> shutdown_;
@@ -57,7 +60,4 @@ class ServerController {
    *	\param	newState	The current state of the server at call time.
    */
   void CheckAndSignalServerState(const bool& newState);
-
-  bool CheckFile(const std::string& filepath) const;
-  bool CreateFile(const std::string& filepath) const;
 };
