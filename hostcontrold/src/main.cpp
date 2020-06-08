@@ -9,6 +9,7 @@
 #include "network/pinger.h"
 #include "network/ssh_shutdown.h"
 #include "network/wake_on_lan.h"
+#include "utils/chrono_time.h"
 #include "utils/ignore.hpp"
 #include "utils/sd_journal_logger.hpp"
 #include "utils/sd_journal_logger_core.h"
@@ -56,12 +57,13 @@ int main(int argc, char* argv[]) {
   }
 
   // create configured controllers
+  auto time = std::make_shared<ChronoTime>();
   auto wol = std::make_shared<WakeOnLan>();
   auto pinger = std::make_shared<Pinger>();
   auto ssh_shutdown = std::make_shared<SshShutdown>();
   for (const auto& config_object : config) {
     const ServerMachineConfig control_config(config_object);
-    controllers.emplace_back(std::make_shared<ServerController>(control_config, wol, pinger, ssh_shutdown));
+    controllers.emplace_back(std::make_shared<ServerController>(control_config, time, wol, pinger, ssh_shutdown));
   }
 
   // main loop

@@ -9,10 +9,12 @@ const char ServerController::kFileKeepOn[] = "force_on";
 const char ServerController::kFileKeepOff[] = "force_off";
 
 ServerController::ServerController(const ServerMachineConfig& config,
+                                   std::shared_ptr<TimeInterface> time,
                                    std::shared_ptr<WolInterface> wol,
                                    std::shared_ptr<PingInterface> ping,
                                    std::shared_ptr<ShutdownInterface> shutdown)
     : config_(config)
+    , time_(time)
     , wol_(wol)
     , ping_(ping)
     , shutdown_(shutdown)
@@ -34,12 +36,12 @@ ServerController::ServerController(const ServerMachineConfig& config,
   CheckAndSignalServerState(false);
 
   // ensure shutdown timeout will be respected if service starts fresh
-  last_client_ = std::chrono::system_clock::now();
+  last_client_ = time_->Now();
 }
 
 void ServerController::DoWork() {
   // do work only in defined interval
-  const auto current_time = std::chrono::system_clock::now();
+  const auto current_time = time_->Now();
   if (last_control_ + config_.control_interval > current_time) {
     return;
   }

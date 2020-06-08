@@ -11,6 +11,7 @@
 #include "network/shutdown_interface.h"
 #include "network/wol_interface.h"
 #include "utils/sd_journal_logger.hpp"
+#include "utils/time_interface.h"
 
 class ServerController {
   static const char kFileOn[];
@@ -20,6 +21,7 @@ class ServerController {
 
  public:
   ServerController(const ServerMachineConfig& config,
+                   std::shared_ptr<TimeInterface> time,
                    std::shared_ptr<WolInterface> wol,
                    std::shared_ptr<PingInterface> ping,
                    std::shared_ptr<ShutdownInterface> shutdown);
@@ -31,6 +33,7 @@ class ServerController {
 
  private:
   const ServerMachineConfig config_;
+  std::shared_ptr<TimeInterface> time_;
   std::shared_ptr<WolInterface> wol_;
   std::shared_ptr<PingInterface> ping_;
   std::shared_ptr<ShutdownInterface> shutdown_;
@@ -38,8 +41,8 @@ class ServerController {
   SdJournalLogger<std::string> logger_;
   bool running_;
 
-  std::chrono::system_clock::time_point last_control_;
-  std::chrono::system_clock::time_point last_client_;
+  TimeInterface::TimePoint last_control_;
+  TimeInterface::TimePoint last_client_;
 
   void StartServerIfNotRunning();
   void ShutdownServerIfRunning();
