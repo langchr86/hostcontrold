@@ -9,7 +9,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 find_package(PkgConfig REQUIRED)
 
 # predefine compile flags
-set(cxxflags -Werror -Wall -Wextra -Wconversion -Wpedantic -Wno-unused-command-line-argument)
+set(cxxflags -Werror -Wall -Wextra -Wconversion -Wpedantic -Wno-unused-command-line-argument -Wno-gnu-zero-variadic-macro-arguments)
 
 # use C++14 standard
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
