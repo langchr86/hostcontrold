@@ -6,12 +6,13 @@
 
 #include "config/server_machine_config.h"
 #include "logic/server_controller.h"
+#include "logic/state_files.h"
 #include "network/pinger.h"
 #include "network/ssh_shutdown.h"
 #include "network/wake_on_lan.h"
 #include "utils/chrono_time.h"
-#include "utils/io_stream_file.h"
 #include "utils/ignore.hpp"
+#include "utils/io_stream_file.h"
 #include "utils/sd_journal_logger.hpp"
 #include "utils/sd_journal_logger_core.h"
 
@@ -65,7 +66,8 @@ int main(int argc, char* argv[]) {
   auto ssh_shutdown = std::make_shared<SshShutdown>();
   for (const auto& config_object : config) {
     const ServerMachineConfig control_config(config_object);
-    controllers.emplace_back(std::make_shared<ServerController>(control_config, time, file, wol, pinger, ssh_shutdown));
+    auto state = std::make_shared<StateFiles>(file, control_config.name, control_config.control_dir);
+    controllers.emplace_back(std::make_shared<ServerController>(control_config, state, time, file, wol, pinger, ssh_shutdown));
   }
 
   // main loop

@@ -1,17 +1,17 @@
 #include "server_controller.h"
 
-const char ServerController::kFileOn[] = "on";
-const char ServerController::kFileOff[] = "off";
 const char ServerController::kFileKeepOn[] = "force_on";
 const char ServerController::kFileKeepOff[] = "force_off";
 
 ServerController::ServerController(const ServerMachineConfig& config,
+                                   std::shared_ptr<StateSignalInterface> state,
                                    std::shared_ptr<TimeInterface> time,
                                    std::shared_ptr<FileInterface> file,
                                    std::shared_ptr<WolInterface> wol,
                                    std::shared_ptr<PingInterface> ping,
                                    std::shared_ptr<ShutdownInterface> shutdown)
     : config_(config)
+    , state_(state)
     , time_(time)
     , file_(file)
     , wol_(wol)
@@ -24,13 +24,8 @@ ServerController::ServerController(const ServerMachineConfig& config,
   // create control directory
   file_->CreateDirectory(config_.control_dir);
 
-  // remove old files
-  file_->RemoveFile(config_.control_dir + kFileOn);
-  file_->RemoveFile(config_.control_dir + kFileOff);
-
-  // force reset server state to off
-  running_ = true;
-  CheckAndSignalServerState(false);
+  // force server state to off
+  state_->InitState(false);
 
   // ensure shutdown timeout will be respected if service starts fresh
   last_client_ = time_->Now();
@@ -78,7 +73,7 @@ void ServerController::DoWork() {
 
 void ServerController::StartServerIfNotRunning() {
   // only if server not running
-  if (running_) {
+  if (state_->GetState()) {
     return;
   }
 
@@ -91,7 +86,7 @@ void ServerController::StartServerIfNotRunning() {
 }
 
 void ServerController::ShutdownServerIfRunning() {
-  if (running_ == false) {
+  if (state_->GetState() == false) {
     return;
   }
   shutdown_->SendShutdownCommand(config_.ip, config_.ssh_user);
@@ -102,11 +97,11 @@ void ServerController::PingServer() {
   switch (result) {
     case PingResult::kHostActive:
       logger_.SdLogDebug("server-ping: host is running");
-      CheckAndSignalServerState(true);
+      state_->NotifyState(true);
       break;
     case PingResult::kHostInactive:
       logger_.SdLogDebug("server-ping: host does not answer");
-      CheckAndSignalServerState(false);
+      state_->NotifyState(false);
       break;
     default:
       logger_.SdLogErr("server-ping: failed");
@@ -132,28 +127,4 @@ bool ServerController::CheckClients() {
 
   // no clients running
   return false;
-}
-
-void ServerController::CheckAndSignalServerState(const bool& newState) {
-  if (newState) {
-    // server changed state to running
-    if (running_ == false) {
-      logger_.SdLogInfo("server started");
-
-      // write on-file and delete off-file
-      file_->CreateEmptyFile(config_.control_dir + kFileOn);
-      file_->RemoveFile(config_.control_dir + kFileOff);
-      running_ = true;
-    }
-  } else {
-    // server changed state to stopped
-    if (running_) {
-      logger_.SdLogInfo("server stopped");
-
-      // write off-file and delete on-file
-      file_->CreateEmptyFile(config_.control_dir + kFileOff);
-      file_->RemoveFile(config_.control_dir + kFileOn);
-      running_ = false;
-    }
-  }
 }

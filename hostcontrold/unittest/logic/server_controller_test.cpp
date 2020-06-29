@@ -5,6 +5,7 @@
 
 #include "config/server_machine_config.h"
 #include "logic/server_controller.h"
+#include "logic/state_signale_interface_mock.h"
 #include "network/ping_interface_mock.h"
 #include "network/shutdown_interface_mock.h"
 #include "network/wol_interface_mock.h"
@@ -34,7 +35,8 @@ static constexpr auto kShutdownTimeout = 10min;
 class ServerControllerTest : public ::testing::Test {
  protected:
   ServerControllerTest()
-      : time_(std::make_shared<StrictMock<TimeInterfaceFake>>())
+      : state_(std::make_shared<StrictMock<StateSignalInterfaceMock>>())
+      , time_(std::make_shared<StrictMock<TimeInterfaceFake>>())
         , file_(std::make_shared<StrictMock<FileInterfaceMock>>())
         , wol_(std::make_shared<StrictMock<WolInterfaceMock>>())
         , ping_(std::make_shared<StrictMock<PingInterfaceMock>>())
@@ -52,7 +54,7 @@ class ServerControllerTest : public ::testing::Test {
     ServerMachineConfig config =
         {kServerName, kServerIp, kServerMac, kServerUser, kControlDir, kControlInterval, kShutdownTimeout, {}};
     config.clients.emplace_back(kClientName, kClientIp);
-    controller_ = std::make_shared<ServerController>(config, time_, file_, wol_, ping_, shutdown_);
+    controller_ = std::make_shared<ServerController>(config, state_, time_, file_, wol_, ping_, shutdown_);
   }
 
   void SetupWithActiveServer() {
@@ -118,6 +120,7 @@ class ServerControllerTest : public ::testing::Test {
     EXPECT_CALL(*shutdown_, SendShutdownCommand(kServerIp, kServerUser));
   }
 
+  std::shared_ptr<StateSignalInterfaceMock> state_;
   std::shared_ptr<TimeInterfaceFake> time_;
   std::shared_ptr<FileInterfaceMock> file_;
   std::shared_ptr<WolInterfaceMock> wol_;
