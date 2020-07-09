@@ -11,23 +11,13 @@ using ::testing::StrictMock;
 using ::testing::_;
 
 static constexpr char kServerName[] = "server";
-static constexpr char kControlDir[] = "/dir/server/";
+static constexpr char kControlDir[] = "/dir/server";
 static constexpr char kOnFile[] = "/dir/server/on";
 static constexpr char kOffFile[] = "/dir/server/off";
 
 class StateFilesTest : public ::testing::Test {
  protected:
-  StateFilesTest() : file_(std::make_shared<StrictMock<FileInterfaceMock>>()) {}
-
-  void SetupWithConfig() {
-    // create control dir
-    EXPECT_CALL(*file_, CreateDirectory(kControlDir));
-
-    // clean up and initial check
-    EXPECT_CALL(*file_, RemoveFile(kOnFile)).Times(2);
-    EXPECT_CALL(*file_, RemoveFile(kOffFile));
-    EXPECT_CALL(*file_, CreateEmptyFile(kOffFile));
-
+  StateFilesTest() : file_(std::make_shared<StrictMock<FileInterfaceMock>>()) {
     state_ = std::make_shared<StateFiles>(file_, kServerName, kControlDir);
   }
 
@@ -55,13 +45,13 @@ class StateFilesTest : public ::testing::Test {
 TEST_F(StateFilesTest, WhenForceInitializeToInactiveThenAlwaysChangeFiles) {
   ExpectStatusFilesChangeToOff();
   state_->InitState(false);
-  ASSERT_FALSE(state_->GetState());
+  ASSERT_FALSE(state_->IsActive());
 }
 
 TEST_F(StateFilesTest, WhenForceInitializeToActiveThenAlwaysChangeFiles) {
   ExpectStatusFilesChangeToOn();
   state_->InitState(true);
-  ASSERT_TRUE(state_->GetState());
+  ASSERT_TRUE(state_->IsActive());
 }
 
 TEST_F(StateFilesTest, GivenInactiveWhenNotifyInactiveThenStatusFilesDoNotChange) {
@@ -70,7 +60,7 @@ TEST_F(StateFilesTest, GivenInactiveWhenNotifyInactiveThenStatusFilesDoNotChange
 
   ExpectNoStatusFileChanges();
   state_->NotifyState(false);
-  ASSERT_FALSE(state_->GetState());
+  ASSERT_FALSE(state_->IsActive());
 }
 
 TEST_F(StateFilesTest, GivenInactiveWhenNotifyActiveThenStatusFilesChangeToOn) {
@@ -79,7 +69,7 @@ TEST_F(StateFilesTest, GivenInactiveWhenNotifyActiveThenStatusFilesChangeToOn) {
 
   ExpectStatusFilesChangeToOn();
   state_->NotifyState(true);
-  ASSERT_TRUE(state_->GetState());
+  ASSERT_TRUE(state_->IsActive());
 }
 
 TEST_F(StateFilesTest, GivenActiveWhenNotifyActiveThenStatusFilesDoNotChange) {
@@ -88,7 +78,7 @@ TEST_F(StateFilesTest, GivenActiveWhenNotifyActiveThenStatusFilesDoNotChange) {
 
   ExpectNoStatusFileChanges();
   state_->NotifyState(true);
-  ASSERT_TRUE(state_->GetState());
+  ASSERT_TRUE(state_->IsActive());
 }
 
 TEST_F(StateFilesTest, GivenActiveWhenNotifyInactiveThenStatusFilesChangeToOff) {
@@ -96,6 +86,6 @@ TEST_F(StateFilesTest, GivenActiveWhenNotifyInactiveThenStatusFilesChangeToOff) 
   state_->InitState(true);
 
   ExpectStatusFilesChangeToOff();
-  state_->NotifyState(true);
-  ASSERT_FALSE(state_->GetState());
+  state_->NotifyState(false);
+  ASSERT_FALSE(state_->IsActive());
 }

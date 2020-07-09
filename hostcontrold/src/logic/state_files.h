@@ -10,8 +10,8 @@
 
 class StateFiles : public StateSignalInterface {
  public:
-  static constexpr char kFileOn[] = "on";
-  static constexpr char kFileOff[] = "off";
+  static const char kFileOn[];
+  static const char kFileOff[];
 
   StateFiles(std::shared_ptr<FileInterface> file, const std::string& host_name, const std::string& control_dir_path);
 
@@ -19,7 +19,7 @@ class StateFiles : public StateSignalInterface {
 
   void NotifyState(bool active) override;
 
-  bool GetState() const override;
+  bool IsActive() const override;
 
  private:
   std::shared_ptr<FileInterface> file_;
@@ -28,5 +28,5 @@ class StateFiles : public StateSignalInterface {
   const std::string off_file_path_;
 
   SdJournalLogger<std::string> logger_;
-  bool running_;
+  bool active_;
 };

@@ -67,7 +67,8 @@ int main(int argc, char* argv[]) {
   for (const auto& config_object : config) {
     const ServerMachineConfig control_config(config_object);
     auto state = std::make_shared<StateFiles>(file, control_config.name, control_config.control_dir);
-    controllers.emplace_back(std::make_shared<ServerController>(control_config, state, time, file, wol, pinger, ssh_shutdown));
+    auto controller = std::make_shared<ServerController>(control_config, state, time, file, wol, pinger, ssh_shutdown);
+    controllers.push_back(controller);
   }
 
   // main loop

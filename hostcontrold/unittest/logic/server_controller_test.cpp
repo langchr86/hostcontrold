@@ -14,6 +14,7 @@
 
 using namespace std::chrono_literals;   // NOLINT[build/namespaces]
 
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::StrictMock;
 using ::testing::_;
@@ -25,8 +26,6 @@ static constexpr char kServerUser[] = "user";
 static constexpr char kClientName[] = "client";
 static constexpr char kClientIp[] = "ClientIp";
 static constexpr char kControlDir[] = "/dir/server/";
-static constexpr char kOnFile[] = "/dir/server/on";
-static constexpr char kOffFile[] = "/dir/server/off";
 static constexpr char kForceOnFile[] = "/dir/server/force_on";
 static constexpr char kForceOffFile[] = "/dir/server/force_off";
 static constexpr auto kControlInterval = 5s;
@@ -35,7 +34,7 @@ static constexpr auto kShutdownTimeout = 10min;
 class ServerControllerTest : public ::testing::Test {
  protected:
   ServerControllerTest()
-      : state_(std::make_shared<StrictMock<StateSignalInterfaceMock>>())
+      : state_(std::make_shared<NiceMock<StateSignalInterfaceMock>>())
       , time_(std::make_shared<StrictMock<TimeInterfaceFake>>())
         , file_(std::make_shared<StrictMock<FileInterfaceMock>>())
         , wol_(std::make_shared<StrictMock<WolInterfaceMock>>())
@@ -46,11 +45,6 @@ class ServerControllerTest : public ::testing::Test {
     // create control dir
     EXPECT_CALL(*file_, CreateDirectory(kControlDir));
 
-    // clean up and initial check
-    EXPECT_CALL(*file_, RemoveFile(kOnFile)).Times(2);
-    EXPECT_CALL(*file_, RemoveFile(kOffFile));
-    EXPECT_CALL(*file_, CreateEmptyFile(kOffFile));
-
     ServerMachineConfig config =
         {kServerName, kServerIp, kServerMac, kServerUser, kControlDir, kControlInterval, kShutdownTimeout, {}};
     config.clients.emplace_back(kClientName, kClientIp);
@@ -59,25 +53,24 @@ class ServerControllerTest : public ::testing::Test {
 
   void SetupWithActiveServer() {
     SetupWithConfig();
-    ExpectActiveServerPing();
-    ExpectStatusFilesChangeToOn();
+    ExpectActiveServer();
   }
 
   void SetupWithStoppedServer() {
     SetupWithConfig();
-    ExpectInactiveServerPing();
+    ExpectInactiveServer();
   }
 
   void IgnoreForceFileChecks() {
     EXPECT_CALL(*file_, CheckFileExists(_)).Times(2);
   }
 
-  void ExpectActiveServerPing() {
-    EXPECT_CALL(*ping_, PingHost(kServerIp)).WillOnce(Return(PingResult::kHostActive));
+  void ExpectActiveServer() {
+    EXPECT_CALL(*state_, IsActive()).WillRepeatedly(Return(true));
   }
 
-  void ExpectInactiveServerPing() {
-    EXPECT_CALL(*ping_, PingHost(kServerIp)).WillOnce(Return(PingResult::kHostInactive));
+  void ExpectInactiveServer() {
+    EXPECT_CALL(*state_, IsActive()).WillRepeatedly(Return(false));
   }
 
   void ExpectOneActiveClientPing() {
@@ -86,23 +79,6 @@ class ServerControllerTest : public ::testing::Test {
 
   void ExpectNoActiveClientPing() {
     EXPECT_CALL(*ping_, PingHost(kClientIp)).WillOnce(Return(PingResult::kHostInactive));
-  }
-
-  void ExpectStatusFilesChangeToOn() {
-    EXPECT_CALL(*file_, CreateEmptyFile(kOnFile));
-    EXPECT_CALL(*file_, RemoveFile(kOffFile));
-  }
-
-  void ExpectStatusFilesChangeToOff() {
-    EXPECT_CALL(*file_, CreateEmptyFile(kOffFile));
-    EXPECT_CALL(*file_, RemoveFile(kOnFile));
-  }
-
-  void ExpectNoStatusFileChanges() {
-    EXPECT_CALL(*file_, CreateEmptyFile(kOnFile)).Times(0);
-    EXPECT_CALL(*file_, CreateEmptyFile(kOffFile)).Times(0);
-    EXPECT_CALL(*file_, RemoveFile(kOnFile)).Times(0);
-    EXPECT_CALL(*file_, RemoveFile(kOffFile)).Times(0);
   }
 
   void ExpectNoServerChange() {
@@ -129,68 +105,6 @@ class ServerControllerTest : public ::testing::Test {
 
   std::shared_ptr<ServerController> controller_;
 };
-
-TEST_F(ServerControllerTest, GivenServerIsInactiveWhenServerPingReturnsInactiveThenStatusFilesDoNotChange) {
-  SetupWithStoppedServer();
-  IgnoreForceFileChecks();
-  ExpectNoActiveClientPing();
-  ExpectNoStatusFileChanges();
-  controller_->DoWork();
-
-  time_->Advance(kControlInterval);
-
-  ExpectInactiveServerPing();
-  IgnoreForceFileChecks();
-  ExpectNoActiveClientPing();
-  ExpectNoStatusFileChanges();
-  controller_->DoWork();
-}
-
-TEST_F(ServerControllerTest, GivenServerIsInactiveWhenServerPingReturnsActiveThenStatusFilesChangeToOn) {
-  SetupWithStoppedServer();
-  IgnoreForceFileChecks();
-  ExpectNoActiveClientPing();
-  ExpectNoStatusFileChanges();
-  controller_->DoWork();
-
-  time_->Advance(kControlInterval);
-
-  ExpectActiveServerPing();
-  IgnoreForceFileChecks();
-  ExpectNoActiveClientPing();
-  ExpectStatusFilesChangeToOn();
-  controller_->DoWork();
-}
-
-TEST_F(ServerControllerTest, GivenServerIsActiveWhenServerPingReturnsActiveThenStatusFilesDoNotChange) {
-  SetupWithActiveServer();
-  IgnoreForceFileChecks();
-  ExpectNoActiveClientPing();
-  controller_->DoWork();
-
-  time_->Advance(kControlInterval);
-
-  ExpectActiveServerPing();
-  IgnoreForceFileChecks();
-  ExpectNoActiveClientPing();
-  ExpectNoStatusFileChanges();
-  controller_->DoWork();
-}
-
-TEST_F(ServerControllerTest, GivenServerIsActiveWhenServerPingReturnsInactiveThenStatusFilesChangeToOff) {
-  SetupWithActiveServer();
-  IgnoreForceFileChecks();
-  ExpectNoActiveClientPing();
-  controller_->DoWork();
-
-  time_->Advance(kControlInterval);
-
-  ExpectInactiveServerPing();
-  IgnoreForceFileChecks();
-  ExpectNoActiveClientPing();
-  ExpectStatusFilesChangeToOff();
-  controller_->DoWork();
-}
 
 TEST_F(ServerControllerTest, GivenServerIsInactiveWhenOneClientIsActiveThenServerStarts) {
   SetupWithStoppedServer();
@@ -241,10 +155,9 @@ TEST_F(ServerControllerTest, GivenServerIsActiveThenNoClientIsActiveRightAtShutd
 
 TEST_F(ServerControllerTest, GivenServerIsActiveThenNoClientIsActivebutTogglesThenTimeoutIsRestarted) {
   SetupWithConfig();
-  ExpectStatusFilesChangeToOn();
 
   // client inactive
-  ExpectActiveServerPing();
+  ExpectActiveServer();
   IgnoreForceFileChecks();
   ExpectNoActiveClientPing();
   ExpectNoServerChange();
@@ -252,7 +165,7 @@ TEST_F(ServerControllerTest, GivenServerIsActiveThenNoClientIsActivebutTogglesTh
   controller_->DoWork();
 
   // client active
-  ExpectActiveServerPing();
+  ExpectActiveServer();
   IgnoreForceFileChecks();
   ExpectOneActiveClientPing();
   ExpectNoServerChange();
@@ -260,7 +173,7 @@ TEST_F(ServerControllerTest, GivenServerIsActiveThenNoClientIsActivebutTogglesTh
   controller_->DoWork();
 
   // client inactive
-  ExpectActiveServerPing();
+  ExpectActiveServer();
   IgnoreForceFileChecks();
   ExpectNoActiveClientPing();
   ExpectNoServerChange();
@@ -268,7 +181,7 @@ TEST_F(ServerControllerTest, GivenServerIsActiveThenNoClientIsActivebutTogglesTh
   controller_->DoWork();
 
   // client inactive
-  ExpectActiveServerPing();
+  ExpectActiveServer();
   IgnoreForceFileChecks();
   ExpectNoActiveClientPing();
   ExpectServerStop();

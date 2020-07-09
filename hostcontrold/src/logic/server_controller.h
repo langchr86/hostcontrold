@@ -7,7 +7,8 @@
 #include <string>
 
 #include "config/server_machine_config.h"
-#include "logic/state_signal_interface.h"
+#include "logic/clients_observer_interface.h"
+#include "logic/server_observer_interface.h"
 #include "network/ping_interface.h"
 #include "network/shutdown_interface.h"
 #include "network/wol_interface.h"
@@ -15,13 +16,12 @@
 #include "utils/sd_journal_logger.hpp"
 #include "utils/time_interface.h"
 
-class ServerController {
+class ServerController : public ClientsObserverInterface, public ServerObserverInterface {
   static const char kFileKeepOn[];
   static const char kFileKeepOff[];
 
  public:
   ServerController(const ServerMachineConfig& config,
-                   std::shared_ptr<StateSignalInterface> state,
                    std::shared_ptr<TimeInterface> time,
                    std::shared_ptr<FileInterface> file,
                    std::shared_ptr<WolInterface> wol,
@@ -33,9 +33,11 @@ class ServerController {
 
   void DoWork();
 
+  void NotifyClientsActive(bool some_are_active) override;
+  void NotifyServerState(bool active) override;
+
  private:
   const ServerMachineConfig config_;
-  std::shared_ptr<StateSignalInterface> state_;
   std::shared_ptr<TimeInterface> time_;
   std::shared_ptr<FileInterface> file_;
   std::shared_ptr<WolInterface> wol_;
