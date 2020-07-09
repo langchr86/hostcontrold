@@ -211,7 +211,6 @@ or build the cmake target `test` which uses the `ctest` framework.
 * User which executed the shutdown command may not need `sudo`. Allow to configure this.
 * Maybe allow to configure whole shutdown command. This would allow to use non-linux servers.
   And some special shutdown handling could be executed.
-* Introduce interfaces and write unit tests for control logic.
 
 
 
