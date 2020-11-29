@@ -1,0 +1,30 @@
+name: software_build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+        version: [7, 8, 9, 10]
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: System information
+        run: |
+          uname -a
+          lsb_release -a
+          sudo docker --version
+
+      - name: Prepare container, build, test and cleanup
+        run: |
+          sudo ./development/1_create.sh ${{matrix.compiler}} ${{matrix.version}}
+          export container_id=$(mktemp)
+          sudo ./development/2_run.sh ${{matrix.compiler}} ${{matrix.version}} ${container_id}
+          sudo docker exec "$(cat ${container_id})" ${{matrix.compiler}} --version
+          sudo docker exec "$(cat ${container_id})" /home/hostcontrold/development/4_test.sh
+          sudo ./development/5_remove.sh ${container_id}

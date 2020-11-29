@@ -1,7 +1,7 @@
 hostcontrold
 ============
 
-[![Build Status](https://travis-ci.com/langchr86/hostcontrold.svg?branch=master)](https://travis-ci.com/langchr86/hostcontrold)
+[![Software Build](https://github.com/langchr86/hostcontrold/workflows/software_build/badge.svg)](https://github.com/langchr86/hostcontrold/actions?query=workflow%3Asoftware_build)
 
 Host Control Daemon.
 Daemon which monitors other hosts with ping requests (ICMP)
@@ -156,7 +156,7 @@ The prefered IDE to work on the code is CLion.
 ### Docker
 
 The whole development steps can also be done in the prepared docker container.
-Those are mainly used to build and test the code with travis on different distributions/toolchains
+Those are mainly used to build and test the code with the github action workflow on different distributions/toolchains
 but can also be used for local development.
 Ubuntu with GCC is used by default.
 
