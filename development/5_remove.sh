@@ -1,9 +1,6 @@
-#! /bin/sh
+#! /bin/bash -e
 
-container_id=${1:-/tmp/hostcontrold-docker-id}
-
-docker rm -f "$(cat ${container_id})"
-rm -f ${container_id}
+docker rm -f test-container
 
 docker rmi -f $(docker images --filter=reference="hostcontrold:*" -q)
 
