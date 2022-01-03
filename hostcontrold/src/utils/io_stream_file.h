@@ -1,7 +1,7 @@
 #pragma once
 
 #include "utils/file_interface.h"
-#include "utils/sd_journal_logger.hpp"
+#include "utils/logger.hpp"
 
 class IOStreamFile : public FileInterface {
  public:
@@ -15,5 +15,5 @@ class IOStreamFile : public FileInterface {
   bool CreateDirectory(const std::string& path) override;
 
  private:
-  SdJournalLogger<> logger_;
+  Logger<> logger_;
 };

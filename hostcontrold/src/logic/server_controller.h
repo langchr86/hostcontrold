@@ -11,7 +11,7 @@
 #include "network/shutdown_interface.h"
 #include "network/wol_interface.h"
 #include "utils/file_interface.h"
-#include "utils/sd_journal_logger.hpp"
+#include "utils/logger.hpp"
 #include "utils/time_interface.h"
 
 class ServerController {
@@ -41,7 +41,7 @@ class ServerController {
   std::shared_ptr<PingInterface> ping_;
   std::shared_ptr<ShutdownInterface> shutdown_;
 
-  SdJournalLogger<std::string> logger_;
+  Logger<std::string> logger_;
   bool running_;
 
   TimeInterface::TimePoint last_control_;

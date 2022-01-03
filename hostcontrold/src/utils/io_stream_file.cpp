@@ -21,7 +21,7 @@ bool IOStreamFile::CreateEmptyFile(const std::string& path) {
 
   std::ofstream file(path);
   if (file.is_open() == false) {
-    logger_.SdLogErr("Failed to create file: %s" , path.c_str());
+    logger_.LogErr("Failed to create file: %s" , path.c_str());
     return false;
   }
 
@@ -35,7 +35,7 @@ bool IOStreamFile::RemoveFile(const std::string& path) {
 
   const int status = std::remove(path.c_str());
   if (status != 0) {
-    logger_.SdLogErr("Failed to delete file: %s: %s" , path.c_str(), std::strerror(errno));
+    logger_.LogErr("Failed to delete file: %s: %s" , path.c_str(), std::strerror(errno));
     return false;
   }
 
@@ -46,12 +46,12 @@ bool IOStreamFile::CreateDirectory(const std::string& path) {
   const int status = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
   if (status != 0 && errno == EEXIST) {
-    logger_.SdLogDebug("Folder already exists: %s" , path.c_str());
+    logger_.LogDebug("Folder already exists: %s" , path.c_str());
     return true;
   }
 
   if (status != 0) {
-    logger_.SdLogErr("Failed to create folder: %s: %s" , path.c_str(), std::strerror(errno));
+    logger_.LogErr("Failed to create folder: %s: %s" , path.c_str(), std::strerror(errno));
     return false;
   }
 

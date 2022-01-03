@@ -12,8 +12,8 @@
 #include "utils/chrono_time.h"
 #include "utils/io_stream_file.h"
 #include "utils/ignore.hpp"
-#include "utils/sd_journal_logger.hpp"
-#include "utils/sd_journal_logger_core.h"
+#include "utils/logger.hpp"
+#include "utils/logger_core.h"
 
 using json = nlohmann::json;
 using namespace std::chrono_literals;   // NOLINT[build/namespaces]
@@ -23,9 +23,9 @@ static constexpr char config_path[] = "/etc/hostcontrold.conf";
 int main(int argc, char* argv[]) {
   ignore_unused(argc, argv);
 
-  SdJournalLoggerCore::SetMaxLogPriority(LOG_INFO);
+  LoggerCore::SetMaxLogPriority(LOG_INFO);
 
-  SdJournalLogger<> logger("Main", {});
+  Logger<> logger("Main", {});
 
   // read config file
   json config;
@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
 
   // create example config if no file exists
   if (config_stream.is_open() == false) {
-    logger.SdLogErr("Found no config file under: %s", config_path);
+    logger.LogErr("Found no config file under: %s", config_path);
 
     ServerMachineConfig example_server_config =
         {"lang-nas16", "192.168.0.6", "40:8D:5C:B6:E6:52", "clang", "/share/lang-nas16/", 5s, 10min, {} };
@@ -45,19 +45,19 @@ int main(int argc, char* argv[]) {
     std::ofstream new_config_stream(config_path);
     new_config_stream << config.dump(2);
     if (new_config_stream.good()) {
-      logger.SdLogInfo("Created example config file under: %s", config_path);
+      logger.LogInfo("Created example config file under: %s", config_path);
     } else {
-      logger.SdLogErr("Failed to create example config file under: %s", config_path);
+      logger.LogErr("Failed to create example config file under: %s", config_path);
     }
     return 1;
   }
 
   // parse config file
-  logger.SdLogInfo("Found existing config file under: %s", config_path);
+  logger.LogInfo("Found existing config file under: %s", config_path);
   try {
     config_stream >> config;
   } catch (const nlohmann::detail::parse_error& e) {
-    logger.SdLogErr("Config parse error: %s", e.what());
+    logger.LogErr("Config parse error: %s", e.what());
     return 1;
   }
 

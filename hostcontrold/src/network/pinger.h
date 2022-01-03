@@ -1,7 +1,7 @@
 #pragma once
 
 #include "network/ping_interface.h"
-#include "utils/sd_journal_logger.hpp"
+#include "utils/logger.hpp"
 
 class Pinger : public PingInterface {
  public:
@@ -12,5 +12,5 @@ class Pinger : public PingInterface {
  private:
   int PingIntern(const std::string& ip) const;
 
-  SdJournalLogger<> logger_;
+  Logger<> logger_;
 };

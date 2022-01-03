@@ -3,10 +3,10 @@
 #include <cerrno>
 #include <cstdio>
 
-#include "utils/sd_journal_logger.hpp"
+#include "utils/logger.hpp"
 
-static const SdJournalLogger<>& GetLogger() {
-  static SdJournalLogger<> logger("SshShutdown", {});
+static const Logger<>& GetLogger() {
+  static Logger<> logger("SshShutdown", {});
   return logger;
 }
 
@@ -20,11 +20,11 @@ bool SshShutdown::SendShutdownCommand(const std::string& host_ipv4_address, cons
   // passphrase secured rsa-key that allows him to connect to the remote. Ensure to configure
   // the correct user of the remote.
   const auto ssh_login = std::string("ssh ") + ssh_user + "@" + host_ipv4_address;
-  GetLogger().SdLogDebug("SSH login command: %s", ssh_login.c_str());
+  GetLogger().LogDebug("SSH login command: %s", ssh_login.c_str());
 
   FILE* ssh = popen(ssh_login.c_str(), "w");
   if (ssh == nullptr) {
-    GetLogger().SdLogErr("popen('%s', 'w') failed with: %s", ssh_login.c_str(), std::strerror(errno));
+    GetLogger().LogErr("popen('%s', 'w') failed with: %s", ssh_login.c_str(), std::strerror(errno));
     return false;
   }
 
@@ -32,10 +32,10 @@ bool SshShutdown::SendShutdownCommand(const std::string& host_ipv4_address, cons
   pclose(ssh);
 
   if (res == EOF) {
-    GetLogger().SdLogErr("fputs('sudo shutdown -h now', ssh); failed with: %s", std::strerror(errno));
+    GetLogger().LogErr("fputs('sudo shutdown -h now', ssh); failed with: %s", std::strerror(errno));
     return false;
   }
 
-  GetLogger().SdLogDebug("shutdown command via SSH executed");
+  GetLogger().LogDebug("shutdown command via SSH executed");
   return true;
 }

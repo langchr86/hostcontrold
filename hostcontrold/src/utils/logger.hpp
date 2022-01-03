@@ -10,23 +10,20 @@
 #include <array>
 #include <regex>
 
-#include "utils/sd_journal_logger_core.h"
+#include "utils/logger_core.h"
 
 /**
- * \brief Logging wrapper for sd-journal.
+ * \brief Logging wrapper for formatting and logging to console.
  *
- * Wrapper to allow flexible logging with context information to journald. Therefore we can instantiate this class
+ * Wrapper to allow flexible logging with context information to console. Therefore we can instantiate this class
  * with static content information like class or file name and an arbitrary list of dynamic context data that is
- * evaluated at log time. All these information are logged as meta data into the log event ready to be filtered by
- * journalctl. Logs with DEBUG priority contain also some meta data in the log message.
- *
- * See unit test for usage examples.
+ * evaluated at log time. Logs with DEBUG priority contain also some meta data in the log message.
  *
  * \tparam Context Parameter pack for all values used in the prefix string. Do provide only the exact type that is
  *                 pointed to and no extra const or *.
  */
 template<typename... Context>
-class SdJournalLogger : private SdJournalLoggerCore {
+class Logger : private LoggerCore {
   // some helpers for tuple unpacking
   template<size_t...>
   struct seq {
@@ -47,16 +44,15 @@ class SdJournalLogger : private SdJournalLoggerCore {
   /**
    * \brief Initialize a logger with context information.
    *
-   * \attention The values pointed to by pointers need to be available until last call to SdJournalLogger::Log.
+   * \attention The values pointed to by pointers need to be available until last call to Logger::Log.
    *
    * \param class_name The class name in which this logger instance is used.
    * \param context_formatters The format strings in an std::array. They should be of form: VAR_NAME=%i or similar.
-   *                           See sd_journal_send for information about formatting of journal meta fields.
    * \param context_pointers Pointers to the values that are dynamically inserted in the format string.
    */
-  SdJournalLogger(const std::string& class_name,
-                  const StringArray& context_formatters,
-                  const Context* ... context_pointers)
+  Logger(const std::string& class_name,
+         const StringArray& context_formatters,
+         const Context* ... context_pointers)
       : class_name_(class_name)
       , context_formatters_(context_formatters)
       , context_pointers_(context_pointers...) {
@@ -70,9 +66,9 @@ class SdJournalLogger : private SdJournalLoggerCore {
   }
 
   /// \attention Do not allow to copy logger with pointers to possible old variables.
-  SdJournalLogger(const SdJournalLogger&) = delete;
+  Logger(const Logger&) = delete;
   /// \attention Do not allow to copy logger with pointers to possible old variables.
-  SdJournalLogger& operator=(const SdJournalLogger&) = delete;
+  Logger& operator=(const Logger&) = delete;
 
   /**
    * \brief Do the logging with the log message formatter string and the arguments.
@@ -81,7 +77,7 @@ class SdJournalLogger : private SdJournalLoggerCore {
    * \param args All arguments that should be represented in the message string.
    */
   template<typename... Args>
-  void SdLogFunc(const char* const function_name, int priority,
+  void LogFunc(const char* const function_name, int priority,
                  const char* const log_format, Args&& ... args) const {
     if (priority > max_priority_) {
       return;
@@ -192,13 +188,13 @@ class SdJournalLogger : private SdJournalLoggerCore {
   }
 };
 
-#define SdLog(...) SdLogFunc(__func__, __VA_ARGS__)
+#define Log(...) LogFunc(__func__, __VA_ARGS__)
 
-#define SdLogDebug(...)   SdLog(LOG_DEBUG, __VA_ARGS__)
-#define SdLogInfo(...)    SdLog(LOG_INFO, __VA_ARGS__)
-#define SdLogNotice(...)  SdLog(LOG_NOTICE, __VA_ARGS__)
-#define SdLogWarning(...) SdLog(LOG_WARNING, __VA_ARGS__)
-#define SdLogErr(...)     SdLog(LOG_ERR, __VA_ARGS__)
-#define SdLogCrit(...)    SdLog(LOG_CRIT, __VA_ARGS__)
-#define SdLogAlert(...)   SdLog(LOG_ALERT, __VA_ARGS__)
-#define SdLogEmerg(...)   SdLog(LOG_EMERG, __VA_ARGS__)
+#define LogDebug(...)   Log(LOG_DEBUG, __VA_ARGS__)
+#define LogInfo(...)    Log(LOG_INFO, __VA_ARGS__)
+#define LogNotice(...)  Log(LOG_NOTICE, __VA_ARGS__)
+#define LogWarning(...) Log(LOG_WARNING, __VA_ARGS__)
+#define LogErr(...)     Log(LOG_ERR, __VA_ARGS__)
+#define LogCrit(...)    Log(LOG_CRIT, __VA_ARGS__)
+#define LogAlert(...)   Log(LOG_ALERT, __VA_ARGS__)
+#define LogEmerg(...)   Log(LOG_EMERG, __VA_ARGS__)

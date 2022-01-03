@@ -19,7 +19,7 @@ ServerController::ServerController(const ServerMachineConfig& config,
     , shutdown_(shutdown)
     , logger_("ServerController", {"HOST=%s"}, &config_.name)
     , last_control_(0) {
-  logger_.SdLogInfo("Start controlling host: %s", config_.name.c_str());
+  logger_.LogInfo("Start controlling host: %s", config_.name.c_str());
 
   // create control directory
   file_->CreateDirectory(config_.control_dir);
@@ -50,7 +50,7 @@ void ServerController::DoWork() {
   // check force_on-file and start server if not already running
   // force_on has higher priority than force_off
   if (file_->CheckFileExists(config_.control_dir + kFileKeepOn)) {
-    logger_.SdLogDebug("force_on file available");
+    logger_.LogDebug("force_on file available");
     StartServerIfNotRunning();
     last_client_ = current_time;
     return;
@@ -58,7 +58,7 @@ void ServerController::DoWork() {
 
   // check force_off-file and stop server if running
   if (file_->CheckFileExists(config_.control_dir + kFileKeepOff)) {
-    logger_.SdLogDebug("force_off file available");
+    logger_.LogDebug("force_off file available");
     ShutdownServerIfRunning();
     return;
   }
@@ -84,10 +84,10 @@ void ServerController::StartServerIfNotRunning() {
 
   // send WOL packet
   if (wol_->SendMagicPacket(config_.mac) == false) {
-    logger_.SdLogErr("WOL failed!");
+    logger_.LogErr("WOL failed!");
   }
 
-  logger_.SdLogDebug("WOL sent");
+  logger_.LogDebug("WOL sent");
 }
 
 void ServerController::ShutdownServerIfRunning() {
@@ -101,15 +101,15 @@ void ServerController::PingServer() {
   const auto result = ping_->PingHost(config_.ip);
   switch (result) {
     case PingResult::kHostActive:
-      logger_.SdLogDebug("server-ping: host is running");
+      logger_.LogDebug("server-ping: host is running");
       CheckAndSignalServerState(true);
       break;
     case PingResult::kHostInactive:
-      logger_.SdLogDebug("server-ping: host does not answer");
+      logger_.LogDebug("server-ping: host does not answer");
       CheckAndSignalServerState(false);
       break;
     default:
-      logger_.SdLogErr("server-ping: failed");
+      logger_.LogErr("server-ping: failed");
       break;
   }
 }
@@ -119,13 +119,13 @@ bool ServerController::CheckClients() {
     const auto result = ping_->PingHost(client.ip);
     switch (result) {
       case PingResult::kHostActive:
-        logger_.SdLogDebug("Client(%s) has answered. Skip other pings.", client.name.c_str());
+        logger_.LogDebug("Client(%s) has answered. Skip other pings.", client.name.c_str());
         return true;
       case PingResult::kHostInactive:
-        logger_.SdLogDebug("Client(%s) does not answer.", client.name.c_str());
+        logger_.LogDebug("Client(%s) does not answer.", client.name.c_str());
         break;
       default:
-        logger_.SdLogErr("client-ping(%s): failed", client.name.c_str());
+        logger_.LogErr("client-ping(%s): failed", client.name.c_str());
         break;
     }
   }
@@ -138,7 +138,7 @@ void ServerController::CheckAndSignalServerState(const bool& newState) {
   if (newState) {
     // server changed state to running
     if (running_ == false) {
-      logger_.SdLogInfo("server started");
+      logger_.LogInfo("server started");
 
       // write on-file and delete off-file
       file_->CreateEmptyFile(config_.control_dir + kFileOn);
@@ -148,7 +148,7 @@ void ServerController::CheckAndSignalServerState(const bool& newState) {
   } else {
     // server changed state to stopped
     if (running_) {
-      logger_.SdLogInfo("server stopped");
+      logger_.LogInfo("server stopped");
 
       // write off-file and delete on-file
       file_->CreateEmptyFile(config_.control_dir + kFileOff);
