@@ -12,7 +12,7 @@ class PingGuard {
 };
 
 Pinger::Pinger()
-    : logger_(__FILE__, "Pinger", {}) {}
+    : logger_("Pinger", {}) {}
 
 PingResult Pinger::PingHost(const std::string& ip) const {
   // create object

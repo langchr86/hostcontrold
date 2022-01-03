@@ -6,7 +6,7 @@
 #include "utils/sd_journal_logger.hpp"
 
 static const SdJournalLogger<>& GetLogger() {
-  static SdJournalLogger<> logger(__FILE__, "SshShutdown", {});
+  static SdJournalLogger<> logger("SshShutdown", {});
   return logger;
 }
 

@@ -54,8 +54,7 @@ class SdJournalLogger : private SdJournalLoggerCore {
    *                           See sd_journal_send for information about formatting of journal meta fields.
    * \param context_pointers Pointers to the values that are dynamically inserted in the format string.
    */
-  SdJournalLogger(const std::string&,
-                  const std::string& class_name,
+  SdJournalLogger(const std::string& class_name,
                   const StringArray& context_formatters,
                   const Context* ... context_pointers)
       : class_name_(class_name)

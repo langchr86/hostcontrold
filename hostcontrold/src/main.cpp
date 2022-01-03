@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
 
   SdJournalLoggerCore::SetMaxLogPriority(LOG_INFO);
 
-  SdJournalLogger<> logger(__FILE__, "Main", {});
+  SdJournalLogger<> logger("Main", {});
 
   // read config file
   json config;

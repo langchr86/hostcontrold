@@ -7,7 +7,7 @@
 #include <fstream>
 
 IOStreamFile::IOStreamFile()
-    : logger_(__FILE__, "IOStreamFile", {}) {}
+    : logger_("IOStreamFile", {}) {}
 
 bool IOStreamFile::CheckFileExists(const std::string& path) const {
   std::ifstream file(path);
