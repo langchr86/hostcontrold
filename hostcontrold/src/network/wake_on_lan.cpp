@@ -65,7 +65,7 @@ bool WakeOnLan::SendWol(const std::string& mac) {
   }
 
   /* Set socket options */
-  if (setsockopt(packet, SOL_SOCKET, SO_BROADCAST, (caddr_t) &optval, sizeof(optval)) < 0) {
+  if (setsockopt(packet, SOL_SOCKET, SO_BROADCAST, &optval, sizeof(optval)) < 0) {
     GetLogger().SdLogErr("setsocket failed: %s", std::strerror(errno));
     close(packet);
     return false;
