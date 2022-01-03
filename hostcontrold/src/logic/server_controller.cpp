@@ -89,7 +89,7 @@ void ServerController::StartServerIfNotRunning() {
     logger_.LogErr("WOL failed!");
   }
 
-  logger_.LogDebug("WOL sent");
+  logger_.LogInfo("WOL sent");
 }
 
 void ServerController::ShutdownServerIfRunning() {

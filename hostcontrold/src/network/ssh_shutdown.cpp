@@ -36,6 +36,6 @@ bool SshShutdown::SendShutdownCommand(const std::string& host_ipv4_address, cons
     return false;
   }
 
-  GetLogger().LogDebug("shutdown command via SSH executed");
+  GetLogger().LogInfo("shutdown command via SSH executed");
   return true;
 }
