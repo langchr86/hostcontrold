@@ -48,7 +48,7 @@ Quick start guide
 * Install build dependencies with:
 
   ~~~
-  sudo apt install make cmake g++ pkg-config libtool libsystemd-dev liboping-dev
+  sudo apt install make cmake g++ pkg-config libtool liboping-dev
   ~~~
 
 * Build and install:

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <systemd/sd-journal.h>
-
 #include <sys/syslog.h>
 
 #include <cstddef>
@@ -51,25 +49,23 @@ class SdJournalLogger : private SdJournalLoggerCore {
    *
    * \attention The values pointed to by pointers need to be available until last call to SdJournalLogger::Log.
    *
-   * \param file_name The file name in which this class is defined. Use macro: __FILE__
    * \param class_name The class name in which this logger instance is used.
    * \param context_formatters The format strings in an std::array. They should be of form: VAR_NAME=%i or similar.
    *                           See sd_journal_send for information about formatting of journal meta fields.
    * \param context_pointers Pointers to the values that are dynamically inserted in the format string.
    */
-  SdJournalLogger(const std::string& file_name,
+  SdJournalLogger(const std::string&,
                   const std::string& class_name,
                   const StringArray& context_formatters,
                   const Context* ... context_pointers)
-      : file_name_(file_name)
-      , class_name_(class_name)
+      : class_name_(class_name)
       , context_formatters_(context_formatters)
       , context_pointers_(context_pointers...) {
     // ensure correct formatters
     const std::regex expression("[A-Z_]*=%.*");
     for (const auto& format : context_formatters) {
       if (std::regex_match(format, expression) == false) {
-        sd_journal_print(LOG_ERR, "Context formatter \"%s\" does not match form: \"VAR_NAME=%%i\".", format.c_str());
+        fprintf(stderr, "Context formatter \"%s\" does not match form: \"VAR_NAME=%%i\".", format.c_str());
       }
     }
   }
@@ -86,21 +82,19 @@ class SdJournalLogger : private SdJournalLoggerCore {
    * \param args All arguments that should be represented in the message string.
    */
   template<typename... Args>
-  void SdLogFunc(const char* const function_name, const char* const line_number, int priority,
+  void SdLogFunc(const char* const function_name, int priority,
                  const char* const log_format, Args&& ... args) const {
     if (priority > max_priority_) {
       return;
     }
     InternLog(gen_seq<sizeof...(Context)>(),
               function_name,
-              line_number,
               priority,
               log_format,
               std::forward<Args>(args)...);
   }
 
  private:
-  const std::string file_name_;
   const std::string class_name_;
   const StringArray context_formatters_;
   const ContextTuple context_pointers_;
@@ -115,14 +109,9 @@ class SdJournalLogger : private SdJournalLoggerCore {
   template<typename... Args, size_t... Is>
   void InternLog(seq<Is...>,
                  const char* const function_name,
-                 const char* const line_number,
                  int priority,
                  const char* const log_format,
                  Args&& ... args) const {
-    // prepare static context strings
-    const auto file_string = std::string("CODE_FILE=") + file_name_;
-    const auto line_string = std::string("CODE_LINE=") + line_number;
-
     // format each individual dynamic context string and store it in an array
     StringArray dynamic_context_strings{
         FormatMetaString(context_formatters_[Is].c_str(), std::get<Is>(context_pointers_))...
@@ -138,18 +127,20 @@ class SdJournalLogger : private SdJournalLoggerCore {
       }
     }
 
-    const auto message_format = std::string("MESSAGE=[%s][%s::%s](%s) ") + log_format;
-    sd_journal_send_with_location(file_string.c_str(),
-                                  line_string.c_str(),
-                                  function_name,
-                                  "PRIORITY=%i", priority,
-                                  "CODE_CLASS=%s", class_name_.c_str(),
-                                  dynamic_context_strings[Is].c_str()...,
-                                  message_format.c_str(),
-                                  GetLogLevelText(priority), class_name_.c_str(), function_name,
-                                  overall_dynamic_context_string.c_str(),
-                                  std::forward<Args>(args)...,
-                                  NULL);
+    FILE* log_stream = stdout;
+    if (priority <= LOG_ERR) {
+      log_stream = stderr;
+    }
+
+    const auto message_format = std::string("[%s][%s::%s](%s) ") + log_format + "\n";
+    fprintf(log_stream,
+            message_format.c_str(),
+            GetLogLevelText(priority),
+            class_name_.c_str(),
+            function_name,
+            overall_dynamic_context_string.c_str(),
+            std::forward<Args>(args)...);
+    fflush(log_stream);
   }
 
   /// \brief Print evaluated value into formatting string and return new string object.
@@ -202,7 +193,7 @@ class SdJournalLogger : private SdJournalLoggerCore {
   }
 };
 
-#define SdLog(...) SdLogFunc(__func__, _SD_STRINGIFY(__LINE__), __VA_ARGS__)
+#define SdLog(...) SdLogFunc(__func__, __VA_ARGS__)
 
 #define SdLogDebug(...)   SdLog(LOG_DEBUG, __VA_ARGS__)
 #define SdLogInfo(...)    SdLog(LOG_INFO, __VA_ARGS__)
