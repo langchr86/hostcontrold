@@ -42,6 +42,15 @@ All the features:
 Quick start guide
 -----------------
 
+### Docker image
+
+The simplest way is to use the docker image: [langchr86/hostcontrold](https://hub.docker.com/r/langchr86/hostcontrold).
+Run the container with the mounted configuration (see below) and the configured control folders.
+
+TODO explain mounts and user
+TODO provide example docker-compose.yml
+
+
 ### Installation
 
 * Clone the repository on your central control linux host.
