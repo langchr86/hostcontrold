@@ -21,7 +21,8 @@ class ServerController {
   static const char kFileKeepOff[];
 
  public:
-  ServerController(const ServerMachineConfig& config,
+  ServerController(bool* stop_execution,
+                   const ServerMachineConfig& config,
                    std::shared_ptr<TimeInterface> time,
                    std::shared_ptr<FileInterface> file,
                    std::shared_ptr<WolInterface> wol,
@@ -34,6 +35,7 @@ class ServerController {
   void DoWork();
 
  private:
+  bool* stop_execution_;
   const ServerMachineConfig config_;
   std::shared_ptr<TimeInterface> time_;
   std::shared_ptr<FileInterface> file_;

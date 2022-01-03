@@ -5,13 +5,15 @@ const char ServerController::kFileOff[] = "off";
 const char ServerController::kFileKeepOn[] = "force_on";
 const char ServerController::kFileKeepOff[] = "force_off";
 
-ServerController::ServerController(const ServerMachineConfig& config,
+ServerController::ServerController(bool* stop_execution,
+                                   const ServerMachineConfig& config,
                                    std::shared_ptr<TimeInterface> time,
                                    std::shared_ptr<FileInterface> file,
                                    std::shared_ptr<WolInterface> wol,
                                    std::shared_ptr<PingInterface> ping,
                                    std::shared_ptr<ShutdownInterface> shutdown)
-    : config_(config)
+    : stop_execution_(stop_execution)
+    , config_(config)
     , time_(time)
     , file_(file)
     , wol_(wol)
@@ -116,6 +118,10 @@ void ServerController::PingServer() {
 
 bool ServerController::CheckClients() {
   for (const auto& client : config_.clients) {
+    if (*stop_execution_) {
+      return false;
+    }
+
     const auto result = ping_->PingHost(client.ip);
     switch (result) {
       case PingResult::kHostActive:

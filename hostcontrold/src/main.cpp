@@ -2,6 +2,9 @@
 #include <memory>
 #include <thread>
 
+#include <csignal>
+#include <cstdlib>
+
 #include <json.hpp>
 
 #include "config/server_machine_config.h"
@@ -20,8 +23,25 @@ using namespace std::chrono_literals;   // NOLINT[build/namespaces]
 
 static constexpr char config_path[] = "/etc/hostcontrold.conf";
 
+static bool stop_execution = false;
+void SignalHandler(int) {
+  stop_execution = true;
+}
+
+void StopSuccessfullyIfNeeded() {
+  if (stop_execution) {
+    exit(EXIT_SUCCESS);
+  }
+}
+
 int main(int argc, char* argv[]) {
   ignore_unused(argc, argv);
+
+  // register signal handlers
+  signal(SIGQUIT, &SignalHandler);
+  signal(SIGHUP, &SignalHandler);
+  signal(SIGINT, &SignalHandler);
+  signal(SIGTERM, &SignalHandler);
 
   LoggerCore::SetMaxLogPriority(LOG_INFO);
 
@@ -69,14 +89,21 @@ int main(int argc, char* argv[]) {
   auto ssh_shutdown = std::make_shared<SshShutdown>();
   for (const auto& config_object : config) {
     const ServerMachineConfig control_config(config_object);
-    controllers.emplace_back(std::make_shared<ServerController>(control_config, time, file, wol, pinger, ssh_shutdown));
+    controllers.emplace_back(std::make_shared<ServerController>(&stop_execution, control_config,
+                                                                time, file, wol, pinger, ssh_shutdown));
   }
 
   // main loop
   while (true) {
+    StopSuccessfullyIfNeeded();
+
     for (const auto& controller : controllers) {
       controller->DoWork();
+      StopSuccessfullyIfNeeded();
     }
+
     std::this_thread::sleep_for(100ms);
   }
+
+  return EXIT_SUCCESS;
 }

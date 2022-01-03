@@ -49,10 +49,11 @@ class ServerControllerTest : public ::testing::Test {
     EXPECT_CALL(*file_, RemoveFile(kOffFile));
     EXPECT_CALL(*file_, CreateEmptyFile(kOffFile));
 
+    bool stop = false;
     ServerMachineConfig config =
         {kServerName, kServerIp, kServerMac, kServerUser, kControlDir, kControlInterval, kShutdownTimeout, {}};
     config.clients.emplace_back(kClientName, kClientIp);
-    controller_ = std::make_shared<ServerController>(config, time_, file_, wol_, ping_, shutdown_);
+    controller_ = std::make_shared<ServerController>(&stop, config, time_, file_, wol_, ping_, shutdown_);
   }
 
   void SetupWithActiveServer() {
