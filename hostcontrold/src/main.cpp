@@ -44,7 +44,11 @@ int main(int argc, char* argv[]) {
 
     std::ofstream new_config_stream(config_path);
     new_config_stream << config.dump(2);
-    logger.SdLogInfo("Created example config file under: %s", config_path);
+    if (new_config_stream.good()) {
+      logger.SdLogInfo("Created example config file under: %s", config_path);
+    } else {
+      logger.SdLogErr("Failed to create example config file under: %s", config_path);
+    }
     return 1;
   }
 
