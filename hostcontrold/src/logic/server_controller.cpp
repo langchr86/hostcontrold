@@ -17,7 +17,7 @@ ServerController::ServerController(const ServerMachineConfig& config,
     , wol_(wol)
     , ping_(ping)
     , shutdown_(shutdown)
-    , logger_(__FILE__, "ServerControl", {"HOST=%s"}, &config_.name)
+    , logger_(__FILE__, "ServerController", {"HOST=%s"}, &config_.name)
     , last_control_(0) {
   logger_.SdLogInfo("Start controlling host: %s", config_.name.c_str());
 
