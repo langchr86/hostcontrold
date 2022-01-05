@@ -10,7 +10,5 @@ class Pinger : public PingInterface {
   PingResult PingHost(const std::string& host_ipv4_address) const override;
 
  private:
-  int PingIntern(const std::string& ip) const;
-
   Logger<> logger_;
 };

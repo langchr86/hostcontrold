@@ -4,9 +4,6 @@ include(cpplint)
 
 project(hostcontrold)
 
-# find external dependencies
-pkg_search_module(liboping REQUIRED IMPORTED_TARGET liboping oping)
-
 # collect sources
 file(GLOB_RECURSE src_lib src/*.cpp)
 file(GLOB_RECURSE hdr_lib src/*.h*)
@@ -16,10 +13,6 @@ list(REMOVE_ITEM src_lib ${src_main})
 # internal library target
 add_library(${PROJECT_NAME}_lib STATIC ${src_lib})
 target_include_directories(${PROJECT_NAME}_lib PUBLIC src)
-target_link_libraries(${PROJECT_NAME}_lib
-    PRIVATE
-      PkgConfig::liboping
-)
 
 # main app target
 add_executable(${PROJECT_NAME} ${src_main})

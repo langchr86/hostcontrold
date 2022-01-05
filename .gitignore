@@ -140,4 +140,3 @@ fabric.properties
 # custom
 #########################
 build/
-libs/liboping

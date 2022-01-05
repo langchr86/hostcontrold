@@ -48,7 +48,7 @@ Quick start guide
 * Install build dependencies with:
 
   ~~~
-  sudo apt install make cmake g++ pkg-config libtool liboping-dev
+  sudo apt install make cmake g++ pkg-config libtool
   ~~~
 
 * Build and install:

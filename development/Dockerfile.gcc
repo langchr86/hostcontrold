@@ -7,7 +7,6 @@ RUN apt-get update \
     software-properties-common \
     systemd \
     pkg-config \
-    liboping-dev \
     make \
     cmake \
     git \
