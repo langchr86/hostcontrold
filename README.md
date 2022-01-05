@@ -87,16 +87,15 @@ ping 192.168.0.6
   * Ensure that the network card has standby-power supply.
   * WOL works only when the host was booted at least one time after complete power loss.
 * Allow central control host to shutdown server host.
-  * Control host need to be able to ssh to the server host without using a password.
-    Usually use an rsa-key. Ensure that the host is already in `~/.ssh/known_hosts`.
+  * Control host needs to be able to ssh to the server host without using a password.
+    Therefore, the user that runs the application needs a correct SSH-Key to connect the server host.
   * Ensure the used user is correctly configured on the server host.
   * The user needs to be able to call sudo. This is used to call the shutdown command.
 
-An example of commands that the root user could use to prepare a server host
+An example of commands that the application user could use to prepare a server host
 where the user `clang` should used to login via ssh:
 
 ~~~
-sudo su
 ssh-keygen
 ssh-copy-id clang@192.168.0.6
 ~~~
@@ -104,7 +103,6 @@ ssh-copy-id clang@192.168.0.6
 You can test if everything is ok if the following command works without any user input:
 
 ~~~
-sudo su
 ssh clang@192.168.0.6
 ~~~
 
