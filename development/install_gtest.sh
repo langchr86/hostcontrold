@@ -12,7 +12,7 @@ trap clear_build_artefacts EXIT
 cd /tmp \
   && git clone https://github.com/google/googletest.git \
   && cd googletest \
-  && git checkout release-1.10.0 \
+  && git checkout release-1.11.0 \
   && mkdir build \
   && cd build \
   && cmake -DBUILD_SHARED_LIBS=OFF .. \
