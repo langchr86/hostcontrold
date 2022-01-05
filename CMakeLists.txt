@@ -10,6 +10,9 @@ find_package(PkgConfig REQUIRED)
 
 # predefine compile flags
 set(cxxflags -Werror -Wall -Wextra -Wconversion -Wpedantic -Wno-unused-command-line-argument -Wno-gnu-zero-variadic-macro-arguments)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(cxxflags ${cxxflags} -Wno-psabi)
+endif ()
 
 # use C++14 standard
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
