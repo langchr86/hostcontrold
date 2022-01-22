@@ -1,0 +1,15 @@
+---
+version: "3.5"
+services:
+  hostcontrold:
+    container_name: "hostcontrold"
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+    network_mode: host
+    environment:
+      - UID=1000
+    volumes:
+      - /home/vagrant/.ssh:/home/hostcontrold/.ssh:ro
+      - ./hostcontrold.conf:/etc/hostcontrold.conf:ro
+      - ./control:/share/hostcontrold

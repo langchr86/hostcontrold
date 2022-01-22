@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
     } else {
       logger.LogErr("Failed to create example config file under: %s", config_path);
     }
-    return 1;
+    return EXIT_FAILURE;
   }
 
   // parse config file
@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
     config_stream >> config;
   } catch (const nlohmann::detail::parse_error& e) {
     logger.LogErr("Config parse error: %s", e.what());
-    return 1;
+    return EXIT_FAILURE;
   }
 
   // create configured controllers
